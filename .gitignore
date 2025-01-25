@@ -4,3 +4,10 @@ app_netdrinks/analysis_options.yaml
 app_netdrinks/.metadata
 
 app_netdrinks/pubspec.lock
+app_netdrinks/.firebaserc
+app_netdrinks/firebase.json
+app_netdrinks/storage.rules
+app_netdrinks/.firebase/hosting.cHVibGlj.cache
+app_netdrinks/.firebase/hosting.YnVpbGRcd2Vi.cache
+app_netdrinks/android/app/google-services.json
+app_netdrinks/lib/firebase_options.dart
