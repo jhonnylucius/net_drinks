@@ -1,0 +1,6 @@
+app_netdrinks/web/manifest.json
+app_netdrinks/android/gradle/wrapper/gradle-wrapper.properties
+app_netdrinks/analysis_options.yaml
+app_netdrinks/.metadata
+
+app_netdrinks/pubspec.lock
