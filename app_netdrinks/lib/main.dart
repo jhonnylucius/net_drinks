@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Drinks',
+      title: 'NetDrinks',
       routes: {
         '/': (context) => const RoteadorTelas(),
         '/dashboard': (context) =>
@@ -41,22 +41,17 @@ class MyApp extends StatelessWidget {
       },
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 123, 21, 141),
-          brightness: Brightness.light,
-          primary: Colors.deepPurple,
-          secondary: Colors.deepPurple,
-          surfaceContainerHighest: const Color.fromARGB(255, 222, 232, 245),
-          surface: const Color.fromARGB(255, 249, 249, 250),
+        scaffoldBackgroundColor: Colors.black,
+        colorScheme: const ColorScheme.dark(
+          primary: Colors.white,
         ),
-        cardTheme: CardTheme(
-          elevation: 4,
-          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.black,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
           ),
         ),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
     );
   }
