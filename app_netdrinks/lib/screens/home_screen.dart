@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Scaffold(
             drawer: Menu(user: widget.user),
             appBar: AppBar(
-              title: Text('GestorFinanceiro'),
+              title: Text('NetDrinks'),
               elevation: 2,
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/background_home_screen.png'),
+                    image: AssetImage('assets/background_home_screen.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
