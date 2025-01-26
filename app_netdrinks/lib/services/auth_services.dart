@@ -124,14 +124,13 @@ class AuthService {
   // Apenas adicionar este método na classe AuthService existente, mantendo todo resto
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      UserCredential userCredential;
+
       if (kIsWeb) {
-        // Configuração específica para Web
         GoogleAuthProvider googleProvider = GoogleAuthProvider();
-        // Removendo escopo de contatos, mantendo apenas autenticação básica
         googleProvider.setCustomParameters({'prompt': 'select_account'});
-        return await _firebaseAuth.signInWithPopup(googleProvider);
+        userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
       } else {
-        // Código para Android
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
         final GoogleSignInAuthentication? googleAuth =
             await googleUser?.authentication;
@@ -141,32 +140,28 @@ class AuthService {
             accessToken: googleAuth?.accessToken,
             idToken: googleAuth?.idToken,
           );
-          final UserCredential userCredential =
-              await _firebaseAuth.signInWithCredential(credential);
-
-          final User? user = userCredential.user;
-
-          if (user != null) {
-            // Salvar nome e email no Firestore
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(user.uid)
-                .set({
-              'displayName':
-                  user.displayName, // Alterado de 'name' para 'displayName'
-              'email': user.email,
-            });
-
-            // Comentário: Correção feita aqui para salvar nome e email no Firestore
-            Logger().i('Usuário logado: ${user.displayName}, ${user.email}');
-          }
-
-          return userCredential;
+          userCredential = await _firebaseAuth.signInWithCredential(credential);
+        } else {
+          return null;
         }
       }
+
+      // Salvar dados no Firestore independente da plataforma
+      final User? user = userCredential.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'displayName': user.displayName,
+          'email': user.email,
+        });
+
+        Logger().i(
+            'Usuário salvo no Firestore: ${user.displayName}, ${user.email}');
+      }
+
+      return userCredential;
     } catch (e) {
       Logger().e('Erro no login com Google: $e');
+      return null;
     }
-    return null;
   }
 }
