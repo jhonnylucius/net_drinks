@@ -1,4 +1,4 @@
-import 'package:app_netdrinks/screens/dashboard_screen.dart'; // Add this line
+import 'package:app_netdrinks/screens/dashboard_screen.dart';
 import 'package:app_netdrinks/screens/home_screen.dart';
 import 'package:app_netdrinks/services/auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -96,7 +96,7 @@ class Menu extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DashBoardScreen(user: user),
+                  builder: (context) => CocktailDetailScreen(user: user),
                 ),
               );
             },
