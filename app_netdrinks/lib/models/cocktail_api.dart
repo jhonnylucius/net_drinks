@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 class CocktailApi {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://www.thecocktaildb.com/api/json/v2/9973533',
+      baseUrl: 'https://www.thecocktaildb.com/api/json/v1',
       connectTimeout: Duration(seconds: 5),
       receiveTimeout: Duration(seconds: 3),
     ),
