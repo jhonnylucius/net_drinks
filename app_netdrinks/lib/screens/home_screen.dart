@@ -1,145 +1,175 @@
-import 'dart:async';
-
 import 'package:app_netdrinks/components/menu.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:app_netdrinks/controller/cocktail_detail_controller.dart';
+import 'package:app_netdrinks/models/cocktail.dart';
+import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
+import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomeScreen extends StatefulWidget {
-  final User user;
-  const HomeScreen({super.key, required this.user});
+  const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  String displayName = '';
-  StreamSubscription<User?>? _authSubscription;
+class HomeScreenState extends State<HomeScreen> {
+  final controller = Get.find<CocktailController>();
+  final PageController pageController = PageController(viewportFraction: 0.7);
+  final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
-    _checkEmailVerification();
-    _loadUserDisplayName();
-    // Adicionar listener para mudanças no estado da autenticação
-    _authSubscription =
-        FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        _loadUserDisplayName();
-      }
-    });
+    pageController.addListener(_onPageChanged);
   }
 
-  Future<void> _checkEmailVerification() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
-      Navigator.pushReplacementNamed(context, '/verify-email');
-    }
-  }
-
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _loadUserDisplayName() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await user.reload();
-      user = FirebaseAuth.instance.currentUser;
-
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.uid)
-          .get();
-
-      if (!mounted) return;
-
-      setState(() {
-        if (userDoc.exists && userDoc.data() != null) {
-          Map<String, dynamic> userData =
-              userDoc.data() as Map<String, dynamic>;
-          displayName = userData['displayName'] ?? user?.displayName ?? '';
-        } else {
-          displayName = user?.displayName ?? '';
-        }
-      });
-    }
+  void _onPageChanged() {
+    int page = pageController.page?.round() ?? 0;
+    _currentPage.value = page;
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-            drawer: Menu(user: widget.user),
-            appBar: AppBar(
-              title: Text('NetDrinks'),
-              elevation: 2,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-            ),
-            body: Container(
-              constraints: BoxConstraints(maxWidth: 480),
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/background_home_screen.jpg'),
+    return Scaffold(
+      drawer: Menu(user: widget.user),
+      appBar: AppBar(
+        title: Text('NetDrinks'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () => _showSearchDialog(context),
+          ),
+        ],
+      ),
+      body: Obx(() {
+        if (controller.loading) {
+          return ProgressIndicador2Widget();
+        }
+
+        if (controller.cocktails.isEmpty) {
+          return Center(child: Text('Nenhum drink encontrado'));
+        }
+
+        return Stack(
+          children: [
+            // Background com imagem do drink atual
+            ValueListenableBuilder<int>(
+              valueListenable: _currentPage,
+              builder: (context, currentIndex, _) {
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  child: Image.network(
+                    controller.cocktails[currentIndex].imageUrl,
+                    key: ValueKey(currentIndex),
+                    width: double.infinity,
+                    height: double.infinity,
                     fit: BoxFit.cover,
                   ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 20,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Text(
-                          'Bem-vindo, $displayName',
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: const Color.fromARGB(255, 123, 21, 141),
-                              fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          FloatingActionButton.extended(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/costs');
-                            },
-                            icon: const Icon(Icons.add, color: Colors.white),
-                            label: const Text('Despesas',
-                                style: TextStyle(color: Colors.white)),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.secondary,
-                          ),
-                          SizedBox(height: 16),
-                          FloatingActionButton.extended(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/expenses');
-                            },
-                            icon: const Icon(Icons.add, color: Colors.white),
-                            label: const Text('Receitas',
-                                style: TextStyle(color: Colors.white)),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                    ),
+                );
+              },
+            ),
+            // Gradiente sobre a imagem
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.7),
+                    Colors.black,
                   ],
                 ),
               ),
-            ));
+            ),
+            // Carrossel na parte inferior
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  // Nome do drink atual
+                  ValueListenableBuilder<int>(
+                    valueListenable: _currentPage,
+                    builder: (context, currentIndex, _) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          controller.cocktails[currentIndex].name,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  // Carrossel de drinks
+                  SizedBox(
+                    height: 200,
+                    child: PageView.builder(
+                      controller: pageController,
+                      itemCount: controller.cocktails.length,
+                      itemBuilder: (context, index) {
+                        return AnimatedScale(
+                          scale: _currentPage.value == index ? 1.0 : 0.8,
+                          duration: Duration(milliseconds: 300),
+                          child: GestureDetector(
+                            onTap: () =>
+                                _navigateToDetails(controller.cocktails[index]),
+                            child: CocktailCard(
+                                cocktail: controller.cocktails[index]),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  void _navigateToDetails(Cocktail cocktail) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CocktailDetailScreen(cocktail: cocktail),
+      ),
+    );
+  }
+
+  void _showSearchDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Search'),
+          content: TextField(
+            decoration: InputDecoration(hintText: 'Enter search term'),
+            onSubmitted: (value) {
+              // Perform search logic here
+              Navigator.of(context).pop();
+            },
+          ),
+        );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
   }
 }
