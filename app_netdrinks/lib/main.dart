@@ -140,11 +140,11 @@ class MyApp extends StatelessWidget {
 class InitialScreen extends StatefulWidget {
   const InitialScreen({super.key});
   @override
-  _InitialScreenState createState() => _InitialScreenState();
+  InitialScreenState createState() => InitialScreenState();
 }
 
-class _InitialScreenState extends State<InitialScreen> {
-  final bool _termsAccepted = false;
+class InitialScreenState extends State<InitialScreen> {
+  final bool termsAccepted = false;
   @override
   void initState() {
     super.initState();
