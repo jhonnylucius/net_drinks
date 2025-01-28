@@ -6,6 +6,7 @@ import 'package:app_netdrinks/screens/language_selection_screen.dart';
 import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
+import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -71,15 +72,7 @@ class MyApp extends StatelessWidget {
       },
       initialRoute: '/',
       routes: {
-        '/': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            return LoginScreen();
-          }
-          return user.emailVerified
-              ? const LanguageSelectionScreen()
-              : VerifyEmailScreen(user: user);
-        },
+        '/': (context) => InitialScreen(),
         '/language-selection': (context) => const LanguageSelectionScreen(),
         '/home': (context) {
           final user = FirebaseAuth.instance.currentUser;
@@ -139,6 +132,73 @@ class MyApp extends StatelessWidget {
           titleLarge: TextStyle(color: Color(0xFFE50914)), // Vermelho Netflix
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+    );
+  }
+}
+
+class InitialScreen extends StatefulWidget {
+  const InitialScreen({super.key});
+  @override
+  _InitialScreenState createState() => _InitialScreenState();
+}
+
+class _InitialScreenState extends State<InitialScreen> {
+  final bool _termsAccepted = false;
+  @override
+  void initState() {
+    super.initState();
+    _checkTermsAccepted();
+  }
+
+  Future<void> _checkTermsAccepted() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool? termsAccepted = prefs.getBool('termsAccepted');
+
+    if (termsAccepted == true) {
+      _navigateToNextScreen();
+    } else {
+      _showTermsOfServiceDialog();
+    }
+  }
+
+  void _showTermsOfServiceDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return TermsOfServiceDialog(
+          onAccepted: () async {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('termsAccepted', true);
+            Navigator.of(context).pop();
+            _navigateToNextScreen();
+          },
+          onDeclined: () {
+            Navigator.of(context).pop();
+            // Lógica para lidar com a recusa dos termos
+          },
+        );
+      },
+    );
+  }
+
+  void _navigateToNextScreen() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      Navigator.of(context).pushReplacementNamed('/login');
+    } else if (!user.emailVerified) {
+      Navigator.of(context).pushReplacementNamed('/verify-email');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/language-selection');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
