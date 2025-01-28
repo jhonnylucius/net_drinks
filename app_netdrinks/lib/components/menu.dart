@@ -32,6 +32,8 @@ class Menu extends StatelessWidget {
               String? erro =
                   await AuthService().excluiConta(senha: senhaController.text);
 
+              if (!context.mounted) return;
+
               Navigator.pop(context);
 
               if (erro != null) {
@@ -79,6 +81,8 @@ class Menu extends StatelessWidget {
             title: Text(FlutterI18n.translate(context, 'menu.logout')),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
+
+              if (!context.mounted) return;
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             },
           ),

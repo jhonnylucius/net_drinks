@@ -142,10 +142,10 @@ class Cocktail {
 
   // Métodos Utilitários Adicionais
   String getIngredientImageUrl(String ingredient,
-      {ImageSize size = ImageSize.MEDIUM}) {
-    final sizeStr = size == ImageSize.SMALL
+      {ImageSize size = ImageSize.medium}) {
+    final sizeStr = size == ImageSize.small
         ? '-Small'
-        : size == ImageSize.MEDIUM
+        : size == ImageSize.medium
             ? '-Medium'
             : '';
     return 'https://www.thecocktaildb.com/images/ingredients/$ingredient$sizeStr.png';
@@ -185,7 +185,7 @@ class Cocktail {
 }
 
 enum ImageSize {
-  SMALL, // 100x100
-  MEDIUM, // 350x350
-  LARGE // 700x700
+  small, // 100x100
+  medium, // 350x350
+  large // 700x700
 }
