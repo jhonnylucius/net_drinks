@@ -1,4 +1,5 @@
 import 'package:app_netdrinks/models/cocktail.dart';
+import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:translator/translator.dart';
@@ -136,7 +137,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       body: Builder(
         builder: (context) {
           if (translatedInstructions == null) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: ProgressIndicador2Widget());
           }
           return SingleChildScrollView(
             padding: EdgeInsets.all(16.0),

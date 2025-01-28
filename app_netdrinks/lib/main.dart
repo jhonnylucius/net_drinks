@@ -6,6 +6,7 @@ import 'package:app_netdrinks/screens/language_selection_screen.dart';
 import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
+import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -72,7 +73,7 @@ class MyApp extends StatelessWidget {
       },
       initialRoute: '/',
       routes: {
-        '/': (context) => InitialScreen(),
+        '/': (context) => const InitialScreen(),
         '/language-selection': (context) => const LanguageSelectionScreen(),
         '/home': (context) {
           final user = FirebaseAuth.instance.currentUser;
@@ -171,11 +172,9 @@ class InitialScreenState extends State<InitialScreen> {
           onAccepted: () async {
             final prefs = await SharedPreferences.getInstance();
             await prefs.setBool('termsAccepted', true);
-            Navigator.of(context).pop();
             _navigateToNextScreen();
           },
           onDeclined: () {
-            Navigator.of(context).pop();
             // Lógica para lidar com a recusa dos termos
           },
         );
@@ -198,7 +197,7 @@ class InitialScreenState extends State<InitialScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: CircularProgressIndicator(),
+        child: ProgressIndicador2Widget(),
       ),
     );
   }

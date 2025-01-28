@@ -26,7 +26,8 @@ class TermsOfServiceDialog extends StatelessWidget {
                   'https://union.dev.br/termosGestorFinanceiro.html'),
               child: Text(
                 'Leia os Termos de Serviço',
-                style: TextStyle(color: Colors.blue),
+                style: TextStyle(
+                    color: Colors.blue, decoration: TextDecoration.underline),
               ),
             ),
           ],
@@ -36,19 +37,15 @@ class TermsOfServiceDialog extends StatelessWidget {
         TextButton(
           child: Text('Aceitar'),
           onPressed: () {
-            onAccepted();
             Navigator.of(context).pop(); // Fechar o diálogo
-            Navigator.of(context).pushNamedAndRemoveUntil(
-                '/login', (route) => false); // Navegar para a tela de login
+            onAccepted();
           },
         ),
         TextButton(
           child: Text('Recusar'),
           onPressed: () {
-            onDeclined();
             Navigator.of(context).pop(); // Fechar o diálogo
-            Navigator.of(context).pushNamedAndRemoveUntil(
-                '/', (route) => false); // Navegar para a tela inicial
+            onDeclined();
           },
         ),
       ],
@@ -56,8 +53,9 @@ class TermsOfServiceDialog extends StatelessWidget {
   }
 
   void _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
       throw 'Could not launch $url';
     }
