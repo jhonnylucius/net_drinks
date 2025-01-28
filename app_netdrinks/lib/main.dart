@@ -1,39 +1,39 @@
 import 'package:app_netdrinks/adapters/cocktail_adapter.dart';
-import 'package:app_netdrinks/firebase_options.dart';
+import 'package:app_netdrinks/bindings/app_bindings.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
-import 'package:app_netdrinks/models/cocktail_api.dart';
-import 'package:app_netdrinks/repository/cocktail_repository.dart';
-import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/screens/home_screen.dart';
+import 'package:app_netdrinks/screens/language_selection_screen.dart';
 import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
-import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
+import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicialização do Hive
+  // Inicializar Firebase
+  await Firebase.initializeApp();
+
+  // Inicializar Hive
   await Hive.initFlutter();
   Hive.registerAdapter(CocktailAdapter());
-  final cocktailBox = await Hive.openBox<Cocktail>('cocktailBox');
+  await Hive.openBox<Cocktail>('cocktailBox');
 
-  // Inicialização do Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  final prefs = await SharedPreferences.getInstance();
+  final String? savedLanguage = prefs.getString('language');
 
-  // Injeção de dependências
-  final api = CocktailApi();
-  Get.put(CocktailRepository(api, cocktailBox));
+  if (savedLanguage != null) {
+    Get.updateLocale(Locale(savedLanguage));
+  }
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -41,22 +41,72 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Drinks',
+      initialBinding: AppBindings(),
+      title: 'NetDrinks',
+      localizationsDelegates: [
+        FlutterI18nDelegate(
+          translationLoader: FileTranslationLoader(
+            basePath: 'assets/lang',
+            fallbackFile: 'en',
+            useCountryCode: false,
+          ),
+        ),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // Inglês
+        Locale('pt', ''), // Português
+        Locale('es', ''), // Espanhol
+      ],
+      localeResolutionCallback: (locale, supportedLocales) {
+        return supportedLocales.firstWhere(
+          (supportedLocale) =>
+              supportedLocale.languageCode == locale?.languageCode,
+          orElse: () => supportedLocales.first,
+        );
+      },
+      initialRoute: '/',
       routes: {
-        '/': (context) => const RoteadorTelas(),
-        '/detail': (context) =>
-            Cocktail_detail_screen.dart
-            Screen(user: FirebaseAuth.instance.currentUser!),
-        '/home': (context) => HomeScreen(
-            user: FirebaseAuth
-                .instance.currentUser!), // Ajustar para passar o usuário atual
-        '/verify-email': (context) => VerifyEmailScreen(
-            user: FirebaseAuth.instance
-                .currentUser!), // Adicionar rota para verificação de email
-        '/login': (context) =>
-            LoginScreen(), // Adicionar rota para verificação de email
+        '/': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            return LoginScreen();
+          }
+          return user.emailVerified
+              ? const LanguageSelectionScreen()
+              : VerifyEmailScreen(user: user);
+        },
+        '/language-selection': (context) => const LanguageSelectionScreen(),
+        '/home': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            return LoginScreen();
+          }
+          return HomeScreen(user: user);
+        },
+        '/verify-email': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            return LoginScreen();
+          }
+          return VerifyEmailScreen(user: user);
+        },
+        '/login': (context) => LoginScreen(),
+        '/cocktail': (context) => CocktailCard(
+              user: FirebaseAuth.instance.currentUser?.uid ?? '',
+              cocktail: Cocktail(
+                idDrink: '1',
+                strDrink: 'Example Drink',
+                strInstructions: 'Mix ingredients',
+                ingredients: ['Ingredient1', 'Ingredient2'],
+                measures: ['1 oz', '2 oz'],
+                name: 'Example Name',
+              ),
+            ),
       },
       theme: ThemeData(
         useMaterial3: true,
@@ -71,105 +121,24 @@ class MyApp extends StatelessWidget {
           onSurface: const Color(0xFFFFFFFF), // Branco
         ),
         scaffoldBackgroundColor: const Color(0xFF000000), // Preto
-        appBarTheme: AppBarTheme(
-          backgroundColor: const Color(0xFF000000), // Preto
-          foregroundColor: const Color(0xFFE50914), // Vermelho Netflix
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF000000), // Preto
+          foregroundColor: Color(0xFFE50914), // Vermelho Netflix
         ),
         cardTheme: CardTheme(
           color: const Color(0xFF121212), // Preto mais claro
           elevation: 4,
-          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(color: const Color(0xFFFFFFFF)), // Branco
-          bodyMedium: TextStyle(color: const Color(0xFFFFFFFF)), // Branco
-          titleLarge:
-              TextStyle(color: const Color(0xFFE50914)), // Vermelho Netflix
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFFFFFFF)), // Branco
+          bodyMedium: TextStyle(color: Color(0xFFFFFFFF)), // Branco
+          titleLarge: TextStyle(color: Color(0xFFE50914)), // Vermelho Netflix
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-    );
-  }
-}
-
-class RoteadorTelas extends StatelessWidget {
-  const RoteadorTelas({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkTermsAccepted(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return const Scaffold(
-            body: Center(
-              child: Text('Erro ao carregar dados.'),
-            ),
-          );
-        } else if (snapshot.data == false) {
-          return TermsOfServiceScreen();
-        } else {
-          return StreamBuilder(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return const Scaffold(
-                    body: Center(
-                  child: Text('Erro ao carregar dados.'),
-                ));
-              } else if (snapshot.hasData) {
-                return HomeScreen(
-                  user: snapshot.data!,
-                );
-              } else {
-                return LoginScreen();
-              }
-            },
-          );
-        }
-      },
-    );
-  }
-
-  Future<bool> _checkTermsAccepted() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('terms_accepted') ?? false;
-  }
-}
-
-class TermsOfServiceScreen extends StatelessWidget {
-  const TermsOfServiceScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: TermsOfServiceDialog(
-          onAccepted: () async {
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setBool('terms_accepted', true);
-            Navigator.of(context).pushReplacementNamed('/');
-          },
-          onDeclined: () {
-            // Fechar o aplicativo ou redirecionar para outra tela
-            Navigator.of(context).pushReplacementNamed('/login');
-          },
-        ),
       ),
     );
   }
