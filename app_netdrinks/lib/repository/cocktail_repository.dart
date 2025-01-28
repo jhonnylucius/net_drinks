@@ -15,8 +15,8 @@ class CocktailRepository {
         return _cache.values.toList();
       }
 
-      // Se não tiver cache, buscar da API
-      final cocktails = await _api.getPopularCocktails();
+      // Se não tiver cache, buscar todos da API
+      final cocktails = await _api.getAllCocktails();
 
       // Salvar no cache
       await _cache.clear();
@@ -24,7 +24,7 @@ class CocktailRepository {
 
       return cocktails;
     } catch (e) {
-      throw Exception('Falha ao carregar cocktails populares: $e');
+      throw Exception('Falha ao carregar cocktails: $e');
     }
   }
 
