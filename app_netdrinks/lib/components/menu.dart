@@ -77,8 +77,15 @@ class Menu extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: Icon(Icons.favorite_border),
+            title: Text(FlutterI18n.translate(context, 'Favoritos')),
+            onTap: () {
+              Navigator.pushNamed(context, '/favorites');
+            },
+          ),
+          ListTile(
             leading: Icon(Icons.logout),
-            title: Text(FlutterI18n.translate(context, 'menu.logout')),
+            title: Text(FlutterI18n.translate(context, 'Sair')),
             onTap: () async {
               await FirebaseAuth.instance.signOut();
 
@@ -88,7 +95,7 @@ class Menu extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.delete),
-            title: Text(FlutterI18n.translate(context, 'menu.delete_account')),
+            title: Text(FlutterI18n.translate(context, 'Excuir Conta')),
             onTap: () => _confirmarExclusao(context),
           ),
         ],

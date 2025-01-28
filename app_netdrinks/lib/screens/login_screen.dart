@@ -8,12 +8,13 @@ import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 
 class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+  LoginScreen({super.key, this.showFavorites = false});
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
 
   final AuthService _authService = AuthService();
+  final bool showFavorites;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +85,10 @@ class LoginScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => HomeScreen(user: user)),
+                                builder: (context) => HomeScreen(
+                                      user: user,
+                                      showFavorites: false,
+                                    )),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +125,10 @@ class LoginScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => HomeScreen(user: user)),
+                                builder: (context) => HomeScreen(
+                                      user: user,
+                                      showFavorites: false,
+                                    )),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(

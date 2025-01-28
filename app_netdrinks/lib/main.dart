@@ -80,7 +80,17 @@ class MyApp extends StatelessWidget {
           if (user == null) {
             return LoginScreen();
           }
-          return HomeScreen(user: user);
+          return HomeScreen(
+            user: user,
+            showFavorites: false,
+          );
+        },
+        '/favorites': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) {
+            return LoginScreen();
+          }
+          return HomeScreen(user: user, showFavorites: true);
         },
         '/verify-email': (context) {
           final user = FirebaseAuth.instance.currentUser;

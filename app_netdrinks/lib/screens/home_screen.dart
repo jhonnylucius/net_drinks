@@ -11,8 +11,9 @@ import 'package:get/get.dart';
 
 class HomeScreen extends StatefulWidget {
   final User user;
+  final bool showFavorites;
 
-  const HomeScreen({super.key, required this.user});
+  const HomeScreen({super.key, required this.user, this.showFavorites = false});
 
   @override
   HomeScreenState createState() => HomeScreenState();
@@ -38,49 +39,74 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // Permite conteúdo atrás do AppBar
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor:
-            Colors.black.withAlpha(179), // AppBar preto semi-transparente
+        backgroundColor: Colors.black.withAlpha(179),
         elevation: 0,
-        title: Text('NetDrinks'),
+        title: Text(widget.showFavorites
+            ? FlutterI18n.translate(context, 'Favoritos')
+            : FlutterI18n.translate(context, 'NetDrinks')),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
         actions: [
+          if (widget.showFavorites)
+            IconButton(
+              icon: const Icon(Icons.home),
+              onPressed: () =>
+                  Navigator.of(context).pushReplacementNamed('/home'),
+            ),
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () => _showSearchDialog(context),
           ),
         ],
       ),
-      drawer: Menu(user: widget.user), // Adiciona o Drawer
+      drawer: Menu(user: widget.user),
       body: Obx(() {
         if (controller.loading) {
           return ProgressIndicador2Widget();
         }
 
+        final displayCocktails = widget.showFavorites
+            ? controller.getFavoriteCocktails()
+            : controller.cocktails;
+
+        if (displayCocktails.isEmpty && widget.showFavorites) {
+          return Center(
+            child: Text(
+              FlutterI18n.translate(context,
+                  'Você não tem Drinks Salvos,\n clique no coração ao lado da foto do Drink pra salvá-lo como favorito!'),
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
         return Stack(
-          fit: StackFit.expand, // Força Stack ocupar tela toda
+          fit: StackFit.expand,
           children: [
-            // Background com imagem
             Positioned.fill(
               child: ValueListenableBuilder<int>(
                 valueListenable: _currentPage,
                 builder: (context, currentIndex, _) {
-                  if (controller.cocktails.isEmpty) return Container();
+                  if (displayCocktails.isEmpty) return Container();
+
+                  if (currentIndex >= displayCocktails.length) {
+                    return Container(); // Evita erro de índice
+                  }
 
                   return AnimatedSwitcher(
-                    duration: Duration(milliseconds: 500),
+                    duration: const Duration(milliseconds: 500),
                     child: Container(
                       key: ValueKey(currentIndex),
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           image: NetworkImage(
-                            controller.cocktails[currentIndex].imageUrl,
+                            displayCocktails[currentIndex].imageUrl,
                           ),
                           fit: BoxFit.cover,
                         ),
@@ -90,8 +116,6 @@ class HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-
-            // Gradiente mais forte
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -104,27 +128,26 @@ class HomeScreenState extends State<HomeScreen> {
                       Colors.black.withAlpha(179),
                       Colors.black.withAlpha(230),
                     ],
-                    stops: [0.0, 0.1, 0.5, 0.9],
+                    stops: const [0.0, 0.1, 0.5, 0.9],
                   ),
                 ),
               ),
             ),
-
-            // Nome do cocktail e carrossel
             SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Nome do cocktail atual
                   ValueListenableBuilder<int>(
                     valueListenable: _currentPage,
                     builder: (context, currentIndex, _) {
-                      if (controller.cocktails.isEmpty) return Container();
+                      if (displayCocktails.isEmpty ||
+                          currentIndex >= displayCocktails.length)
+                        return Container();
 
                       return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
-                          controller.cocktails[currentIndex].name,
+                          displayCocktails[currentIndex].name,
                           style: Theme.of(context)
                               .textTheme
                               .headlineMedium
@@ -137,31 +160,29 @@ class HomeScreenState extends State<HomeScreen> {
                       );
                     },
                   ),
-                  SizedBox(height: 20),
-
-                  // Carrossel
+                  const SizedBox(height: 20),
                   SizedBox(
                     height: 200,
                     child: PageView.builder(
                       controller: pageController,
-                      itemCount: controller.cocktails.length,
+                      itemCount: displayCocktails.length,
                       itemBuilder: (context, index) {
                         return AnimatedScale(
                           scale: _currentPage.value == index ? 1.0 : 0.8,
-                          duration: Duration(milliseconds: 300),
+                          duration: const Duration(milliseconds: 300),
                           child: GestureDetector(
                             onTap: () =>
-                                _navigateToDetails(controller.cocktails[index]),
+                                _navigateToDetails(displayCocktails[index]),
                             child: CocktailCard(
-                              cocktail: controller.cocktails[index],
-                              user: '',
+                              cocktail: displayCocktails[index],
+                              user: widget.user.uid,
                             ),
                           ),
                         );
                       },
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -178,30 +199,28 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _navigateToDetails(Cocktail cocktail) {
-    // Navigate to details page
     Get.to(() => CocktailDetailScreen(cocktail: cocktail));
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Widget _showSearchDialog(BuildContext context) {
     return AlertDialog(
-      title: Text(FlutterI18n.translate(context, 'search.title')),
+      title: Text(FlutterI18n.translate(context, 'Pesquisa por nome')),
       content: TextField(
         decoration: InputDecoration(
-          hintText: FlutterI18n.translate(context, 'search.name'),
+          hintText: FlutterI18n.translate(context, 'Pesquisa por nome'),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(FlutterI18n.translate(context, 'search.cancel')),
+          child: Text(FlutterI18n.translate(context, 'Cancelar Pesquisa')),
         ),
         TextButton(
           onPressed: () {
-            // Perform search action
             Navigator.of(context).pop();
           },
-          child: Text(FlutterI18n.translate(context, 'search.search')),
+          child: Text(FlutterI18n.translate(context, 'Procurar')),
         ),
       ],
     );

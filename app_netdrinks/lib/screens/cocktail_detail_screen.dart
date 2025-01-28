@@ -1,7 +1,9 @@
+import 'package:app_netdrinks/controller/cocktail_detail_controller.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
+import 'package:get/get.dart';
 import 'package:translator/translator.dart';
 
 class CocktailDetailScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class CocktailDetailScreen extends StatefulWidget {
 class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   String _selectedLanguage = 'pt'; // Iniciar com o idioma português
   final translator = GoogleTranslator();
+  final CocktailController controller = Get.find<CocktailController>();
 
   String? translatedAlternateName;
   String? translatedCategory;
@@ -94,10 +97,20 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
         title: Text(widget.cocktail.name),
         backgroundColor: Colors.black.withAlpha((0.7 * 255).toInt()),
         actions: [
+          Obx(() {
+            return IconButton(
+              icon: Icon(
+                controller.isFavorite(widget.cocktail.idDrink)
+                    ? Icons.star
+                    : Icons.star_border,
+                color: Colors.yellow,
+              ),
+              onPressed: () =>
+                  controller.toggleFavorite(widget.cocktail.idDrink),
+            );
+          }),
           Padding(
-            padding: const EdgeInsets.only(
-                right:
-                    16.0), // Ajuste este valor para mover o botão para a esquerda
+            padding: const EdgeInsets.only(right: 16.0),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedLanguage,
@@ -144,7 +157,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagem do cocktail
                 Center(
                   child: Image.network(
                     widget.cocktail.imageUrl,
@@ -153,8 +165,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   ),
                 ),
                 SizedBox(height: 16.0),
-
-                // Nome do cocktail
                 Text(
                   widget.cocktail.name,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -163,16 +173,12 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                       ),
                 ),
                 SizedBox(height: 8.0),
-
-                // Nome Alternativo
                 if (translatedAlternateName != null)
                   Text(
                     '${FlutterI18n.translate(context, "alternative_name")}: $translatedAlternateName',
                     style: TextStyle(color: Colors.white),
                   ),
                 SizedBox(height: 8.0),
-
-                // Categoria
                 Row(
                   children: [
                     Icon(Icons.category, color: Colors.redAccent),
@@ -184,8 +190,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   ],
                 ),
                 SizedBox(height: 8.0),
-
-                // Tipo de bebida
                 Row(
                   children: [
                     Icon(Icons.local_bar, color: Colors.redAccent),
@@ -197,8 +201,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   ],
                 ),
                 SizedBox(height: 8.0),
-
-                // Tipo de copo
                 Row(
                   children: [
                     Icon(Icons.wine_bar, color: Colors.redAccent),
@@ -210,8 +212,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   ],
                 ),
                 SizedBox(height: 8.0),
-
-                // Tags
                 if (translatedTags != null)
                   Wrap(
                     spacing: 8.0,
@@ -224,8 +224,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     }).toList(),
                   ),
                 SizedBox(height: 8.0),
-
-                // Ingredientes
                 Text(
                   '${FlutterI18n.translate(context, "ingredients")}:',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -267,8 +265,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     );
                   }),
                 SizedBox(height: 16.0),
-
-                // Instruções
                 Text(
                   '${FlutterI18n.translate(context, "instructions")}:',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
