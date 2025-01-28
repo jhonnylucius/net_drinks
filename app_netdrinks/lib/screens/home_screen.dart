@@ -1,26 +1,32 @@
 import 'package:app_netdrinks/components/menu.dart';
 import 'package:app_netdrinks/controller/cocktail_detail_controller.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
+import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
 import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User user;
+
+  const HomeScreen({super.key, required this.user});
 
   @override
   HomeScreenState createState() => HomeScreenState();
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  final controller = Get.find<CocktailController>();
   final PageController pageController = PageController(viewportFraction: 0.7);
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
+  late final CocktailController controller;
 
   @override
   void initState() {
     super.initState();
+    controller = Get.find<CocktailController>();
     pageController.addListener(_onPageChanged);
   }
 
@@ -32,9 +38,18 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Menu(user: widget.user),
+      extendBodyBehindAppBar: true, // Permite conteúdo atrás do AppBar
       appBar: AppBar(
+        backgroundColor:
+            Colors.black.withAlpha(179), // AppBar preto semi-transparente
+        elevation: 0,
         title: Text('NetDrinks'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.search),
@@ -42,58 +57,70 @@ class HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      drawer: Menu(user: widget.user), // Adiciona o Drawer
       body: Obx(() {
         if (controller.loading) {
           return ProgressIndicador2Widget();
         }
 
-        if (controller.cocktails.isEmpty) {
-          return Center(child: Text('Nenhum drink encontrado'));
-        }
-
         return Stack(
+          fit: StackFit.expand, // Força Stack ocupar tela toda
           children: [
-            // Background com imagem do drink atual
-            ValueListenableBuilder<int>(
-              valueListenable: _currentPage,
-              builder: (context, currentIndex, _) {
-                return AnimatedSwitcher(
-                  duration: Duration(milliseconds: 500),
-                  child: Image.network(
-                    controller.cocktails[currentIndex].imageUrl,
-                    key: ValueKey(currentIndex),
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                );
-              },
+            // Background com imagem
+            Positioned.fill(
+              child: ValueListenableBuilder<int>(
+                valueListenable: _currentPage,
+                builder: (context, currentIndex, _) {
+                  if (controller.cocktails.isEmpty) return Container();
+
+                  return AnimatedSwitcher(
+                    duration: Duration(milliseconds: 500),
+                    child: Container(
+                      key: ValueKey(currentIndex),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            controller.cocktails[currentIndex].imageUrl,
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-            // Gradiente sobre a imagem
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.7),
-                    Colors.black,
-                  ],
+
+            // Gradiente mais forte
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withAlpha(179),
+                      Colors.black.withAlpha(51),
+                      Colors.black.withAlpha(179),
+                      Colors.black.withAlpha(230),
+                    ],
+                    stops: [0.0, 0.1, 0.5, 0.9],
+                  ),
                 ),
               ),
             ),
-            // Carrossel na parte inferior
-            Positioned(
-              bottom: 20,
-              left: 0,
-              right: 0,
+
+            // Nome do cocktail e carrossel
+            SafeArea(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Nome do drink atual
+                  // Nome do cocktail atual
                   ValueListenableBuilder<int>(
                     valueListenable: _currentPage,
                     builder: (context, currentIndex, _) {
+                      if (controller.cocktails.isEmpty) return Container();
+
                       return Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
@@ -111,7 +138,8 @@ class HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   SizedBox(height: 20),
-                  // Carrossel de drinks
+
+                  // Carrossel
                   SizedBox(
                     height: 200,
                     child: PageView.builder(
@@ -125,12 +153,15 @@ class HomeScreenState extends State<HomeScreen> {
                             onTap: () =>
                                 _navigateToDetails(controller.cocktails[index]),
                             child: CocktailCard(
-                                cocktail: controller.cocktails[index]),
+                              cocktail: controller.cocktails[index],
+                              user: '',
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
+                  SizedBox(height: 40),
                 ],
               ),
             ),
@@ -140,36 +171,39 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _navigateToDetails(Cocktail cocktail) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CocktailDetailScreen(cocktail: cocktail),
-      ),
-    );
-  }
-
-  void _showSearchDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Search'),
-          content: TextField(
-            decoration: InputDecoration(hintText: 'Enter search term'),
-            onSubmitted: (value) {
-              // Perform search logic here
-              Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
-    );
-  }
-
   @override
   void dispose() {
     pageController.dispose();
     super.dispose();
+  }
+
+  Widget _navigateToDetails(Cocktail cocktail) {
+    // Navigate to details page
+    Get.to(() => CocktailDetailScreen(cocktail: cocktail));
+    return SizedBox.shrink();
+  }
+
+  Widget _showSearchDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text(FlutterI18n.translate(context, 'search.title')),
+      content: TextField(
+        decoration: InputDecoration(
+          hintText: FlutterI18n.translate(context, 'search.name'),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(FlutterI18n.translate(context, 'search.cancel')),
+        ),
+        TextButton(
+          onPressed: () {
+            // Perform search action
+            Navigator.of(context).pop();
+          },
+          child: Text(FlutterI18n.translate(context, 'search.search')),
+        ),
+      ],
+    );
   }
 }

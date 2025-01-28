@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CocktailCard extends StatelessWidget {
   final Cocktail cocktail;
 
-  const CocktailCard({super.key, required this.cocktail});
+  const CocktailCard({super.key, required this.cocktail, required String user});
 
   @override
   Widget build(BuildContext context) {

@@ -131,31 +131,41 @@ class AuthService {
         googleProvider.setCustomParameters({'prompt': 'select_account'});
         userCredential = await _firebaseAuth.signInWithPopup(googleProvider);
       } else {
+        // 1. Login Google
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-        final GoogleSignInAuthentication? googleAuth =
-            await googleUser?.authentication;
-
-        if (googleAuth?.accessToken != null && googleAuth?.idToken != null) {
-          final credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth?.accessToken,
-            idToken: googleAuth?.idToken,
-          );
-          userCredential = await _firebaseAuth.signInWithCredential(credential);
-        } else {
+        if (googleUser == null) {
+          Logger().w('Usuário cancelou login Google');
           return null;
         }
-      }
 
-      // Salvar dados no Firestore independente da plataforma
-      final User? user = userCredential.user;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'displayName': user.displayName,
-          'email': user.email,
-        });
+        // 2. Autenticação Google
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+        Logger().i('Token obtido: ${googleAuth.accessToken != null}');
 
-        Logger().i(
-            'Usuário salvo no Firestore: ${user.displayName}, ${user.email}');
+        // 3. Credencial Firebase
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // 4. Login Firebase
+        userCredential = await _firebaseAuth.signInWithCredential(credential);
+        Logger().i('Login Firebase realizado: ${userCredential.user?.uid}');
+
+        // 5. Salvar no Firestore
+        if (userCredential.user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set({
+            'displayName': userCredential.user!.displayName,
+            'email': userCredential.user!.email,
+            'lastLogin': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+
+          Logger().i('Dados salvos no Firestore');
+        }
       }
 
       return userCredential;
