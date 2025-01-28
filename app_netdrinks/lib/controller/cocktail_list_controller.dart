@@ -19,7 +19,7 @@ class CocktailListController {
   Future<void> getCocktail() async {
     try {
       logger.d('Fetching Cocktail...');
-      var result = await api.getCocktails();
+      var result = await api.searchByName(' ');
       logger.d('Cocktail fetched: ${result.length}');
       _controller.sink.add(result);
     } catch (error) {
@@ -31,7 +31,8 @@ class CocktailListController {
   Future<void> searchCocktail(Map<String, String?> filters) async {
     try {
       logger.d('Searching cocktail with filters: $filters');
-      var result = await api.getCocktails(); // Ajustar para usar filtros na API
+      var result =
+          await api.searchByName(''); // Ajustar para usar filtros na API
       if (filters['name'] != null && filters['name']!.isNotEmpty) {
         result = result
             .where((cocktail) => cocktail.name
@@ -50,7 +51,7 @@ class CocktailListController {
       if (filters['category'] != null && filters['category']!.isNotEmpty) {
         result = result
             .where((cocktail) =>
-                cocktail.gender.toLowerCase() ==
+                cocktail.category.toLowerCase() ==
                 filters['category']!.toLowerCase())
             .toList();
       }

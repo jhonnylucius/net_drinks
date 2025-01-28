@@ -25,6 +25,7 @@ class Cocktail {
     this.strDrinkThumb,
     required this.ingredients,
     required this.measures,
+    required String name,
   });
 
   factory Cocktail.fromJson(Map<String, dynamic> json) {
@@ -54,6 +55,7 @@ class Cocktail {
       strDrinkThumb: json['strDrinkThumb'],
       ingredients: ingredients,
       measures: measures,
+      name: json['strDrink'],
     );
   }
 
@@ -106,6 +108,7 @@ class Cocktail {
       strDrinkThumb: strDrinkThumb ?? this.strDrinkThumb,
       ingredients: ingredients ?? this.ingredients,
       measures: measures ?? this.measures,
+      name: '',
     );
   }
 

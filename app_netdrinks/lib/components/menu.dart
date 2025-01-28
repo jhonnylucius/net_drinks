@@ -1,12 +1,10 @@
-import 'package:app_netdrinks/screens/dashboard_screen.dart';
-import 'package:app_netdrinks/screens/home_screen.dart';
 import 'package:app_netdrinks/services/auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 
 class Menu extends StatelessWidget {
   final User user;
-  final String senha = 'Sua Senha'; // Replace with actual password logic
 
   const Menu({super.key, required this.user});
 
@@ -16,18 +14,18 @@ class Menu extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Confirmar Exclusão'),
+        title: Text(FlutterI18n.translate(context, 'menu.confirm_delete')),
         content: TextField(
           controller: senhaController,
           obscureText: true,
           decoration: InputDecoration(
-            labelText: 'Digite sua senha para confirmar',
+            labelText: FlutterI18n.translate(context, 'menu.enter_password'),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar'),
+            child: Text(FlutterI18n.translate(context, 'menu.cancel')),
           ),
           TextButton(
             onPressed: () async {
@@ -44,7 +42,7 @@ class Menu extends StatelessWidget {
                 Navigator.of(context).pushReplacementNamed('/login');
               }
             },
-            child: Text('Excluir'),
+            child: Text(FlutterI18n.translate(context, 'menu.delete')),
           ),
         ],
       ),
@@ -55,63 +53,38 @@ class Menu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountEmail: Text(user.email!),
+            accountName: Text(user.displayName ?? 'Usuário'),
+            accountEmail: Text(user.email ?? ''),
             currentAccountPicture: CircleAvatar(
-              backgroundColor: const Color.fromARGB(255, 201, 192, 228),
-              child: user.photoURL != null
-                  ? ClipOval(
-                      child: Image.network(
-                        user.photoURL!,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : const Icon(
-                      Icons.manage_accounts_rounded,
-                      size: 48,
-                    ),
+              backgroundImage:
+                  user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+              child: user.photoURL == null
+                  ? Icon(Icons.emoji_emotions_sharp,
+                      size: 40) // Added icon when no photoURL
+                  : null,
             ),
-            accountName:
-                Text(user.displayName != null ? user.displayName! : ''),
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: const Text('Home'),
+            title: Text(FlutterI18n.translate(context, 'menu.home')),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(user: user),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CocktailDetailScreen(user: user),
-                ),
-              );
+              Navigator.pushNamed(context, '/home');
             },
           ),
           ListTile(
             leading: Icon(Icons.logout),
-            title: const Text('Sair'),
+            title: Text(FlutterI18n.translate(context, 'menu.logout')),
             onTap: () async {
-              await AuthService().deslogar();
+              await FirebaseAuth.instance.signOut();
               Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
             },
           ),
           ListTile(
             leading: Icon(Icons.delete),
-            title: const Text('Excluir Conta'),
+            title: Text(FlutterI18n.translate(context, 'menu.delete_account')),
             onTap: () => _confirmarExclusao(context),
           ),
         ],
