@@ -13,3 +13,4 @@ app_netdrinks/android/app/google-services.json
 app_netdrinks/lib/firebase_options.dart
 app_netdrinks/lib/models/cocktails13_api.dart
 app_netdrinks/lib/models/cocktail_api.dart
+app_netdrinks/dartanalyzer
