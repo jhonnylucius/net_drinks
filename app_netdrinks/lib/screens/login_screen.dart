@@ -1,7 +1,10 @@
 import 'package:app_netdrinks/modal/reset_password_modal.dart';
+import 'package:app_netdrinks/screens/home_screen.dart';
 import 'package:app_netdrinks/screens/register_screen.dart';
 import 'package:app_netdrinks/services/auth_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -19,9 +22,8 @@ class LoginScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage(
-                "assets/background_login.jpg"), // Caminho da sua imagem
-            fit: BoxFit.cover, // Adapta a imagem ao container
+            image: AssetImage("assets/background_login.jpg"),
+            fit: BoxFit.cover,
           ),
         ),
         child: Center(
@@ -30,8 +32,7 @@ class LoginScreen extends StatelessWidget {
               margin: EdgeInsets.symmetric(horizontal: 24),
               padding: EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Color.fromRGBO(
-                    255, 255, 255, 1), // Branco com 80% de opacidade
+                color: Color.fromRGBO(255, 255, 255, 1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.black12),
               ),
@@ -46,81 +47,107 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 16.0),
                   TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'E-mail'),
+                    style:
+                        TextStyle(color: Colors.black), // Cor do texto digitado
+                    decoration: InputDecoration(
+                      labelText: FlutterI18n.translate(context, "login.email"),
+                    ),
                   ),
                   SizedBox(height: 16.0),
                   TextField(
                     obscureText: true,
                     controller: _senhaController,
-                    decoration: InputDecoration(hintText: 'Senha'),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      _authService
-                          .entrarUsuario(
-                        _emailController.text,
-                        _senhaController.text,
-                      )
-                          .then(
-                        (String? erro) {
-                          if (erro != null) {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text(erro),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                      child: Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
-                      );
-                    },
-                    child: Text('Entrar'),
+                    decoration: InputDecoration(
+                      hintText:
+                          FlutterI18n.translate(context, "login.password"),
+                    ),
                   ),
                   SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final email = _emailController.text;
+                      final senha = _senhaController.text;
+
+                      if (email.isEmpty || senha.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Por favor, preencha todos os campos')),
+                        );
+                        return;
+                      }
+
+                      try {
+                        await _authService.entrarUsuario(email, senha);
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen(user: user)),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Erro ao fazer login: Usuário não encontrado')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Erro ao fazer login: $e')),
+                        );
+                      }
+                    },
+                    child: Text(FlutterI18n.translate(context, "Entrar")),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => ResetPasswordModal(),
+                      );
+                    },
+                    child: Text(FlutterI18n.translate(
+                        context, "login.forgot_password")),
+                  ),
                   SignInButton(
                     Buttons.Google,
-                    text: 'Entrar com Google',
-                    onPressed: () {
-                      _authService.signInWithGoogle();
+                    onPressed: () async {
+                      try {
+                        await _authService.signInWithGoogle();
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => HomeScreen(user: user)),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'Erro ao fazer login com Google: Usuário não encontrado')),
+                          );
+                        }
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Erro ao fazer login com Google: $e')),
+                        );
+                      }
                     },
-                  ),
-                  SizedBox(height: 12.0),
-                  ColoredBox(
-                    color: const Color.fromARGB(255, 226, 191, 224),
-                    child: SizedBox(
-                      height: 1,
-                    ),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RegisterScreen()));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RegisterScreen()),
+                      );
                     },
-                    child: Text('Criar uma conta!'),
-                  ),
-                  SizedBox(height: 12.0),
-                  TextButton(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return ResetPasswordModal();
-                          });
-                    },
-                    child: Text('Esqueci minha senha!'),
+                    child: Text(FlutterI18n.translate(context, "Criar Conta")),
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_i18n/flutter_i18n.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   final User user;
@@ -48,11 +49,12 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false, // Desabilita o gesto de voltar e o botão físico/virtual
+    return WillPopScope(
+      onWillPop: () async =>
+          false, // Desabilita o gesto de voltar e o botão físico/virtual
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Verifique seu Email'),
+          title: Text(FlutterI18n.translate(context, 'verify.title')),
           automaticallyImplyLeading: false,
         ),
         body: Center(
@@ -60,12 +62,13 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Um email de verificação foi enviado para ${widget.user.email}.',
+                FlutterI18n.translate(context, 'verify.email_sent',
+                    translationParams: {'email': widget.user.email!}),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16.0),
-              const Text(
-                'Assim que você verificar seu email, você será redirecionado automaticamente.',
+              Text(
+                FlutterI18n.translate(context, 'verify.check_email'),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16.0),
@@ -73,13 +76,14 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 onPressed: () async {
                   await widget.user.sendEmailVerification();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Email de verificação reenviado.'),
+                    SnackBar(
+                      content:
+                          Text(FlutterI18n.translate(context, 'verify.resent')),
                       backgroundColor: Colors.green,
                     ),
                   );
                 },
-                child: const Text('Reenviar email de verificação'),
+                child: Text(FlutterI18n.translate(context, 'verify.resend')),
               ),
             ],
           ),
