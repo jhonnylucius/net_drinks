@@ -6,7 +6,6 @@ import 'package:app_netdrinks/screens/language_selection_screen.dart';
 import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
-import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -207,7 +206,7 @@ class InitialScreenState extends State<InitialScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ProgressIndicador2Widget(),
+        child: CircularProgressIndicator(),
       ),
     );
   }

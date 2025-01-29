@@ -3,7 +3,6 @@ import 'package:app_netdrinks/controller/cocktail_detail_controller.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
-import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
@@ -68,7 +67,7 @@ class HomeScreenState extends State<HomeScreen> {
       drawer: Menu(user: widget.user),
       body: Obx(() {
         if (controller.loading) {
-          return ProgressIndicador2Widget();
+          return CircularProgressIndicator();
         }
 
         final displayCocktails = widget.showFavorites

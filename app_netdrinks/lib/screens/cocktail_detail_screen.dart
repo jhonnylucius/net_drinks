@@ -1,6 +1,5 @@
 import 'package:app_netdrinks/controller/cocktail_detail_controller.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
-import 'package:app_netdrinks/widgets/progress_indicador2_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
@@ -97,24 +96,13 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
         title: Text(widget.cocktail.name),
         backgroundColor: Colors.black.withAlpha((0.7 * 255).toInt()),
         actions: [
-          Obx(() {
-            return IconButton(
-              icon: Icon(
-                controller.isFavorite(widget.cocktail.idDrink)
-                    ? Icons.star
-                    : Icons.star_border,
-                color: Colors.yellow,
-              ),
-              onPressed: () =>
-                  controller.toggleFavorite(widget.cocktail.idDrink),
-            );
-          }),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedLanguage,
-                icon: Icon(Icons.language, color: Colors.white),
+                icon: Icon(Icons.language,
+                    color: const Color.fromARGB(255, 185, 3, 3)),
                 dropdownColor: Colors.black,
                 items: [
                   DropdownMenuItem(
@@ -150,7 +138,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       body: Builder(
         builder: (context) {
           if (translatedInstructions == null) {
-            return Center(child: ProgressIndicador2Widget());
+            return Center(child: CircularProgressIndicator());
           }
           return SingleChildScrollView(
             padding: EdgeInsets.all(16.0),
