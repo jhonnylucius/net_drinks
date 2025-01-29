@@ -22,6 +22,19 @@ class CocktailController extends GetxController {
     loadFavorites();
   }
 
+  Future<void> fetchPopularCocktails() async {
+    try {
+      _loading.value = true;
+      final result = await repository.getPopularCocktails();
+      _cocktails.assignAll(result);
+      print('Cocktails fetched: ${_cocktails.length}');
+    } catch (e) {
+      print('Error fetching cocktails: $e');
+    } finally {
+      _loading.value = false;
+    }
+  }
+
   Future<void> loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     final favoriteIds = prefs.getStringList('favoriteCocktails') ?? [];
@@ -48,15 +61,5 @@ class CocktailController extends GetxController {
 
   List<Cocktail> getFavoriteCocktails() {
     return _cocktails.where((c) => _favorites.contains(c.idDrink)).toList();
-  }
-
-  Future<void> fetchPopularCocktails() async {
-    try {
-      _loading.value = true;
-      final result = await repository.getPopularCocktails();
-      _cocktails.assignAll(result);
-    } finally {
-      _loading.value = false;
-    }
   }
 }

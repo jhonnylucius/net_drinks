@@ -60,14 +60,14 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () => _showSearchDialog(context),
+            onPressed: () => Get.toNamed('/search'),
           ),
         ],
       ),
       drawer: Menu(user: widget.user),
       body: Obx(() {
         if (controller.loading) {
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         }
 
         final displayCocktails = widget.showFavorites
@@ -201,28 +201,5 @@ class HomeScreenState extends State<HomeScreen> {
   Widget _navigateToDetails(Cocktail cocktail) {
     Get.to(() => CocktailDetailScreen(cocktail: cocktail));
     return const SizedBox.shrink();
-  }
-
-  Widget _showSearchDialog(BuildContext context) {
-    return AlertDialog(
-      title: Text(FlutterI18n.translate(context, 'Pesquisa por nome')),
-      content: TextField(
-        decoration: InputDecoration(
-          hintText: FlutterI18n.translate(context, 'Pesquisa por nome'),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(FlutterI18n.translate(context, 'Cancelar Pesquisa')),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text(FlutterI18n.translate(context, 'Procurar')),
-        ),
-      ],
-    );
   }
 }

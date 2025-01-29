@@ -1,11 +1,14 @@
 import 'package:app_netdrinks/adapters/cocktail_adapter.dart';
 import 'package:app_netdrinks/bindings/app_bindings.dart';
+import 'package:app_netdrinks/bindings/search_binding.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
+import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/screens/home_screen.dart';
-import 'package:app_netdrinks/screens/language_selection_screen.dart';
 import 'package:app_netdrinks/screens/login_screen.dart';
+import 'package:app_netdrinks/screens/search/search_results_screen.dart';
+import 'package:app_netdrinks/screens/search/search_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
-import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
+import 'package:app_netdrinks/widgets/cocktail_card_widget.dart' as widget;
 import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -71,46 +74,69 @@ class MyApp extends StatelessWidget {
         );
       },
       initialRoute: '/',
-      routes: {
-        '/': (context) => const InitialScreen(),
-        '/language-selection': (context) => const LanguageSelectionScreen(),
-        '/home': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            return LoginScreen();
-          }
-          return HomeScreen(
-            user: user,
-            showFavorites: false,
-          );
-        },
-        '/favorites': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            return LoginScreen();
-          }
-          return HomeScreen(user: user, showFavorites: true);
-        },
-        '/verify-email': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            return LoginScreen();
-          }
-          return VerifyEmailScreen(user: user);
-        },
-        '/login': (context) => LoginScreen(),
-        '/cocktail': (context) => CocktailCard(
-              user: FirebaseAuth.instance.currentUser?.uid ?? '',
-              cocktail: Cocktail(
-                idDrink: '1',
-                strDrink: 'Example Drink',
-                strInstructions: 'Mix ingredients',
-                ingredients: ['Ingredient1', 'Ingredient2'],
-                measures: ['1 oz', '2 oz'],
-                name: 'Example Name',
-              ),
+      getPages: [
+        GetPage(name: '/', page: () => const InitialScreen()),
+        GetPage(
+          name: '/home',
+          page: () {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              return LoginScreen();
+            }
+            return HomeScreen(user: user, showFavorites: false);
+          },
+        ),
+        GetPage(
+          name: '/favorites',
+          page: () {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              return LoginScreen();
+            }
+            return HomeScreen(user: user, showFavorites: true);
+          },
+        ),
+        GetPage(
+          name: '/verify-email',
+          page: () {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              return LoginScreen();
+            }
+            return VerifyEmailScreen(user: user);
+          },
+        ),
+        GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(
+          name: '/cocktail',
+          page: () => widget.CocktailCard(
+            user: FirebaseAuth.instance.currentUser?.uid ?? '',
+            cocktail: Cocktail(
+              idDrink: '1',
+              strDrink: 'Example Drink',
+              strInstructions: 'Mix ingredients',
+              ingredients: ['Ingredient1', 'Ingredient2'],
+              measures: ['1 oz', '2 oz'],
+              name: 'Example Name',
             ),
-      },
+          ),
+        ),
+        // Adicionar as novas rotas de pesquisa
+        GetPage(
+          name: '/search',
+          page: () => SearchScreen(),
+          binding: SearchBinding(),
+        ),
+        GetPage(
+          name: '/search-results',
+          page: () => SearchResultsScreen(),
+          binding: SearchBinding(),
+        ),
+        GetPage(
+          name: '/cocktail-detail',
+          page: () => CocktailDetailScreen(cocktail: Get.arguments),
+        ),
+      ],
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -184,6 +210,7 @@ class InitialScreenState extends State<InitialScreen> {
             _navigateToNextScreen();
           },
           onDeclined: () {
+            Navigator.of(context).pop();
             // Lógica para lidar com a recusa dos termos
           },
         );
@@ -198,7 +225,7 @@ class InitialScreenState extends State<InitialScreen> {
     } else if (!user.emailVerified) {
       Navigator.of(context).pushReplacementNamed('/verify-email');
     } else {
-      Navigator.of(context).pushReplacementNamed('/language-selection');
+      Navigator.of(context).pushReplacementNamed('/home');
     }
   }
 
