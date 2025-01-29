@@ -140,8 +140,9 @@ class HomeScreenState extends State<HomeScreen> {
                     valueListenable: _currentPage,
                     builder: (context, currentIndex, _) {
                       if (displayCocktails.isEmpty ||
-                          currentIndex >= displayCocktails.length)
+                          currentIndex >= displayCocktails.length) {
                         return Container();
+                      }
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
