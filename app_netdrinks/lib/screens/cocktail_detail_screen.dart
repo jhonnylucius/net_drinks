@@ -59,9 +59,19 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   }
 
   Future<String?> _translateText(String? text) async {
-    if (text == null) return null;
-    final translation = await translator.translate(text, to: _selectedLanguage);
-    return translation.text;
+    if (text == null || text.isEmpty)
+      return text; // Retorna texto original se for nulo ou vazio
+    if (RegExp(r'^\d+$').hasMatch(text))
+      return text; // Se for número, retorna ele sem tradução
+
+    try {
+      final translation =
+          await translator.translate(text, to: _selectedLanguage);
+      return translation.text;
+    } catch (e) {
+      print("Erro ao traduzir: $e");
+      return text; // Retorna o texto original se houver erro
+    }
   }
 
   Future<List<String>> _translateTags(String? tags) async {
