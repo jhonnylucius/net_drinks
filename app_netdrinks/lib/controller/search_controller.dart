@@ -7,6 +7,7 @@ class SearchController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxList<Cocktail> searchResults = <Cocktail>[].obs;
   var popularResults = <Cocktail>[].obs;
+  var maisRecentesResults = <Cocktail>[].obs;
 
   Future<void> searchByFirstLetter(String letter) async {
     try {
@@ -21,6 +22,16 @@ class SearchController extends GetxController {
     try {
       isLoading.value = true;
       searchResults.value = await _searchService.searchPopular('someArgument');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> searchMaisRecentes() async {
+    try {
+      isLoading.value = true;
+      searchResults.value =
+          await _searchService.searchMaisRecentes('someArgument');
     } finally {
       isLoading.value = false;
     }
