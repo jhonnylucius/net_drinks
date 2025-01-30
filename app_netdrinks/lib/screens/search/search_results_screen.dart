@@ -4,9 +4,7 @@ import 'package:get/get.dart';
 
 class SearchResultsScreen extends StatelessWidget {
   final custom.SearchController controller = Get.find();
-
   SearchResultsScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +19,6 @@ class SearchResultsScreen extends StatelessWidget {
         if (controller.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         }
-
         if (controller.searchResults.isEmpty) {
           return Center(
             child: Text(
@@ -30,7 +27,6 @@ class SearchResultsScreen extends StatelessWidget {
             ),
           );
         }
-
         return GridView.builder(
           padding: EdgeInsets.all(8),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -56,9 +52,7 @@ class SearchResultsScreen extends StatelessWidget {
 class CocktailCard extends StatelessWidget {
   final dynamic cocktail;
   final String user;
-
   const CocktailCard({required this.cocktail, required this.user, super.key});
-
   @override
   Widget build(BuildContext context) {
     return Card(
