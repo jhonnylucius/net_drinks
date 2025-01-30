@@ -22,10 +22,14 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _handleSearch() {
-    _focusNode.unfocus(); // Fecha o teclado
-    controller.searchByFirstLetter(searchController.text);
-    final searchText = searchController.text.trim(); // Remove espaços em branco
+    _focusNode.unfocus();
+    final searchText = searchController.text.trim();
     controller.searchByFirstLetter(searchText);
+  }
+
+  void _handlePopularSearch() {
+    _focusNode.unfocus();
+    controller.searchPopular();
   }
 
   @override
@@ -56,40 +60,52 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
             ),
           ),
-          Obx(() => controller.isLoading.value
-              ? CircularProgressIndicator()
-              : Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(8.0), // Padding na lista
-                    itemCount: controller.searchResults.length,
-                    itemBuilder: (context, index) {
-                      final cocktail = controller.searchResults[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0), // Espaço entre itens
-                        child: ListTile(
-                          leading: Container(
-                            width: 80, // Aumentar largura da imagem
-                            height: 80, // Aumentar altura da imagem
-                            child: Image.network(
-                              cocktail.imageUrl,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          title: Text(
-                            cocktail.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onTap: () => Get.toNamed('/cocktail-detail',
-                              arguments: cocktail),
+          ElevatedButton(
+            onPressed: _handlePopularSearch,
+            child: Text('Pesquisar Drinks Populares'),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              final allResults = [
+                ...controller.searchResults,
+                ...controller.popularResults
+              ];
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: allResults.length,
+                itemBuilder: (context, index) {
+                  final cocktail = allResults[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: ListTile(
+                      leading: Container(
+                        width: 80,
+                        height: 80,
+                        child: Image.network(
+                          cocktail.imageUrl,
+                          fit: BoxFit.cover,
                         ),
-                      );
-                    },
-                  ),
-                )),
+                      ),
+                      title: Text(
+                        cocktail.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () =>
+                          Get.toNamed('/cocktail-detail', arguments: cocktail),
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
         ],
       ),
     );
