@@ -36,26 +36,24 @@ class Cocktail {
       String ingredientKey = 'strIngredient$i';
       String measureKey = 'strMeasure$i';
 
-      if (json[ingredientKey] != null) {
-        ingredients.add(json[ingredientKey]);
-        measures.add(json[measureKey]);
-      }
+      ingredients.add(json[ingredientKey] as String?);
+      measures.add(json[measureKey] as String?);
     }
 
     return Cocktail(
-      idDrink: json['idDrink'],
-      strDrink: json['strDrink'],
-      strDrinkAlternate: json['strDrinkAlternate'],
-      strTags: json['strTags'],
-      strCategory: json['strCategory'],
-      strIBA: json['strIBA'],
-      strAlcoholic: json['strAlcoholic'],
-      strGlass: json['strGlass'],
-      strInstructions: json['strInstructions'],
-      strDrinkThumb: json['strDrinkThumb'],
+      idDrink: json['idDrink'] ?? '',
+      strDrink: json['strDrink'] ?? '',
+      strDrinkAlternate: json['strDrinkAlternate'] as String?,
+      strTags: json['strTags'] as String?,
+      strCategory: json['strCategory'] as String?,
+      strIBA: json['strIBA'] as String?,
+      strAlcoholic: json['strAlcoholic'] as String?,
+      strGlass: json['strGlass'] as String?,
+      strInstructions: json['strInstructions'] ?? '',
+      strDrinkThumb: json['strDrinkThumb'] as String?,
       ingredients: ingredients,
       measures: measures,
-      name: json['strDrink'],
+      name: json['strDrink'] ?? '',
     );
   }
 
