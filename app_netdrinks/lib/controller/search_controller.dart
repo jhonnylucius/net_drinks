@@ -8,11 +8,35 @@ class SearchController extends GetxController {
   final RxList<Cocktail> searchResults = <Cocktail>[].obs;
   var popularResults = <Cocktail>[].obs;
   var maisRecentesResults = <Cocktail>[].obs;
+  var dezAleatorioResults = <Cocktail>[].obs;
+  var multiIngredientsResults = <Cocktail>[].obs;
 
   Future<void> searchByFirstLetter(String letter) async {
     try {
       isLoading.value = true;
+      // Limpa os outros resultados
+      popularResults.clear();
+      maisRecentesResults.clear();
+      dezAleatorioResults.clear();
+      multiIngredientsResults.clear();
+
       searchResults.value = await _searchService.searchByFirstLetter(letter);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> searchMultiIngredients(String ingredients) async {
+    try {
+      isLoading.value = true;
+      // Limpa os outros resultados
+      searchResults.clear();
+      popularResults.clear();
+      maisRecentesResults.clear();
+      dezAleatorioResults.clear();
+
+      multiIngredientsResults.value =
+          await _searchService.searchMultiIngredients(ingredients);
     } finally {
       isLoading.value = false;
     }
@@ -21,7 +45,13 @@ class SearchController extends GetxController {
   Future<void> searchPopular() async {
     try {
       isLoading.value = true;
-      searchResults.value = await _searchService.searchPopular('someArgument');
+      // Limpa os outros resultados
+      searchResults.clear();
+      maisRecentesResults.clear();
+      dezAleatorioResults.clear();
+      multiIngredientsResults.clear();
+
+      popularResults.value = await _searchService.searchPopular();
     } finally {
       isLoading.value = false;
     }
@@ -30,8 +60,42 @@ class SearchController extends GetxController {
   Future<void> searchMaisRecentes() async {
     try {
       isLoading.value = true;
-      searchResults.value =
-          await _searchService.searchMaisRecentes('someArgument');
+      // Limpa os outros resultados
+      searchResults.clear();
+      popularResults.clear();
+      dezAleatorioResults.clear();
+      multiIngredientsResults.clear();
+
+      maisRecentesResults.value = await _searchService.searchMaisRecentes();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> searchDezAleatorio() async {
+    try {
+      isLoading.value = true;
+      // Limpa os outros resultados
+      searchResults.clear();
+      popularResults.clear();
+      maisRecentesResults.clear();
+      multiIngredientsResults.clear();
+
+      dezAleatorioResults.value = await _searchService.searchDezAleatorio();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchCocktailDetailsAndNavigate(String drinkId) async {
+    try {
+      isLoading.value = true;
+      final details = await _searchService.getCocktailDetails(drinkId);
+      if (details != null) {
+        Get.toNamed('/cocktail-detail', arguments: details);
+      } else {
+        Get.snackbar("Erro", "Não foi possível carregar detalhes do drink.");
+      }
     } finally {
       isLoading.value = false;
     }
