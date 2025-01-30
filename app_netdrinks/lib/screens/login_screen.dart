@@ -48,8 +48,7 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 16.0),
                   TextField(
                     controller: _emailController,
-                    style:
-                        TextStyle(color: Colors.black), // Cor do texto digitado
+                    style: TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       labelText: FlutterI18n.translate(context, "login.email"),
                     ),
@@ -105,7 +104,8 @@ class LoginScreen extends StatelessWidget {
                     },
                     child: Text(FlutterI18n.translate(context, "Entrar")),
                   ),
-                  TextButton(
+                  SizedBox(height: 10),
+                  ElevatedButton(
                     onPressed: () {
                       showDialog(
                         context: context,
@@ -115,6 +115,7 @@ class LoginScreen extends StatelessWidget {
                     child: Text(FlutterI18n.translate(
                         context, "login.forgot_password")),
                   ),
+                  SizedBox(height: 10),
                   SignInButton(
                     Buttons.Google,
                     onPressed: () async {
@@ -146,7 +147,8 @@ class LoginScreen extends StatelessWidget {
                       }
                     },
                   ),
-                  TextButton(
+                  SizedBox(height: 10),
+                  ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
