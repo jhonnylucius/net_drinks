@@ -12,29 +12,47 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final controller = Get.put(netdrink.SearchController());
   final searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final multiIngredientsController = TextEditingController();
+  final FocusNode _focusNodeFirstLetter = FocusNode();
+  final FocusNode _focusNodeMultiIngredients = FocusNode();
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    _focusNodeFirstLetter.dispose();
+    _focusNodeMultiIngredients.dispose();
     searchController.dispose();
+    multiIngredientsController.dispose();
     super.dispose();
   }
 
   void _handleSearch() {
-    _focusNode.unfocus();
-    final searchText = searchController.text.trim();
+    _focusNodeFirstLetter.unfocus(); // Fecha o teclado
+    final searchText = searchController.text.trim(); // Remove espaços em branco
     controller.searchByFirstLetter(searchText);
   }
 
+  void _handleMultiIngredientsSearch() {
+    _focusNodeMultiIngredients.unfocus(); // Fecha o teclado
+    final searchText = multiIngredientsController.text.trim();
+    controller.searchMultiIngredients(searchText);
+  }
+
   void _handlePopularSearch() {
-    _focusNode.unfocus();
+    _focusNodeFirstLetter.unfocus();
+    _focusNodeMultiIngredients.unfocus();
     controller.searchPopular();
   }
 
   void _handleMaisRecentesSearch() {
-    _focusNode.unfocus();
+    _focusNodeFirstLetter.unfocus();
+    _focusNodeMultiIngredients.unfocus();
     controller.searchMaisRecentes();
+  }
+
+  void _handleDezAleatorio() {
+    _focusNodeFirstLetter.unfocus();
+    _focusNodeMultiIngredients.unfocus();
+    controller.searchDezAleatorio();
   }
 
   @override
@@ -55,12 +73,26 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: searchController,
-              focusNode: _focusNode,
+              focusNode: _focusNodeFirstLetter,
               decoration: InputDecoration(
                 hintText: 'Buscar por primeira letra...',
                 suffixIcon: IconButton(
                   icon: Icon(Icons.search),
                   onPressed: _handleSearch,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: multiIngredientsController,
+              focusNode: _focusNodeMultiIngredients,
+              decoration: InputDecoration(
+                hintText: 'Buscar por vários ingredientes...',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _handleMultiIngredientsSearch,
                 ),
               ),
             ),
@@ -71,7 +103,11 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           ElevatedButton(
             onPressed: _handleMaisRecentesSearch,
-            child: Text('Pesquisar por Drinks mais recentes'),
+            child: Text('Pesquisar os Drinks mais recentes'),
+          ),
+          ElevatedButton(
+            onPressed: _handleDezAleatorio,
+            child: Text('Pesquisar 10 Drinks Aleatórios'),
           ),
           Expanded(
             child: Obx(() {
@@ -82,7 +118,9 @@ class _SearchScreenState extends State<SearchScreen> {
               final allResults = [
                 ...controller.searchResults,
                 ...controller.popularResults,
-                ...controller.maisRecentesResults
+                ...controller.maisRecentesResults,
+                ...controller.dezAleatorioResults,
+                ...controller.multiIngredientsResults
               ];
 
               return ListView.builder(
@@ -108,8 +146,19 @@ class _SearchScreenState extends State<SearchScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      onTap: () =>
-                          Get.toNamed('/cocktail-detail', arguments: cocktail),
+                      onTap: () async {
+                        if (cocktail.ingredients.isNotEmpty &&
+                            cocktail.instructions.isNotEmpty) {
+                          // Se já tem detalhes completos, navega direto
+                          Get.toNamed('/cocktail-detail', arguments: cocktail);
+                        } else {
+                          // Caso contrário, busca detalhes antes de navegar
+                          print(
+                              "Buscando detalhes para ID: ${cocktail.idDrink}");
+                          await controller.fetchCocktailDetailsAndNavigate(
+                              cocktail.idDrink);
+                        }
+                      },
                     ),
                   );
                 },
