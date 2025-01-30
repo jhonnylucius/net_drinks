@@ -1,6 +1,7 @@
 import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:app_netdrinks/repository/cocktail_repository.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CocktailController extends GetxController {
@@ -27,9 +28,9 @@ class CocktailController extends GetxController {
       _loading.value = true;
       final result = await repository.getPopularCocktails();
       _cocktails.assignAll(result);
-      print('Cocktails fetched: ${_cocktails.length}');
+      Logger().e('Cocktails fetched: ${_cocktails.length}');
     } catch (e) {
-      print('Error fetching cocktails: $e');
+      Logger().e('Error fetching cocktails: $e');
     } finally {
       _loading.value = false;
     }
