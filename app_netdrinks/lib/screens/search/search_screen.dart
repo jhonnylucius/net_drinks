@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SearchScreen extends StatefulWidget {
-  SearchScreen({super.key});
+  const SearchScreen({super.key});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -30,6 +30,11 @@ class _SearchScreenState extends State<SearchScreen> {
   void _handlePopularSearch() {
     _focusNode.unfocus();
     controller.searchPopular();
+  }
+
+  void _handleMaisRecentesSearch() {
+    _focusNode.unfocus();
+    controller.searchMaisRecentes();
   }
 
   @override
@@ -64,6 +69,10 @@ class _SearchScreenState extends State<SearchScreen> {
             onPressed: _handlePopularSearch,
             child: Text('Pesquisar Drinks Populares'),
           ),
+          ElevatedButton(
+            onPressed: _handleMaisRecentesSearch,
+            child: Text('Pesquisar por Drinks mais recentes'),
+          ),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -72,7 +81,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
               final allResults = [
                 ...controller.searchResults,
-                ...controller.popularResults
+                ...controller.popularResults,
+                ...controller.maisRecentesResults
               ];
 
               return ListView.builder(
