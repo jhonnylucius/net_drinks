@@ -30,11 +30,26 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _translateContent();
+    if (widget.cocktail != null) {
+      _translateContent();
+    } else {
+      // Handle the case where cocktail is null
+      print("Cocktail data is null");
+      // You can set default values or show an error message to the user
+      setState(() {
+        translatedAlternateName = "N/A";
+        translatedCategory = "N/A";
+        translatedAlcohol = "N/A";
+        translatedGlass = "N/A";
+        translatedInstructions = "N/A";
+        translatedTags = [];
+        translatedIngredients = [];
+      });
+    }
   }
 
   Future<void> _translateContent() async {
-    if (_selectedLanguage != 'en') {
+    if (_selectedLanguage != 'en' && widget.cocktail != null) {
       translatedAlternateName =
           await _translateText(widget.cocktail.strDrinkAlternate);
       translatedCategory = await _translateText(widget.cocktail.category);
@@ -45,24 +60,26 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       translatedTags = await _translateTags(widget.cocktail.strTags);
       translatedIngredients = await _translateIngredients(
           widget.cocktail.getIngredientsWithMeasures());
-    } else {
-      translatedAlternateName = widget.cocktail.strDrinkAlternate;
-      translatedCategory = widget.cocktail.category;
-      translatedAlcohol = widget.cocktail.alcohol;
-      translatedGlass = widget.cocktail.strGlass;
-      translatedInstructions = widget.cocktail.instructions;
-      translatedTags =
-          widget.cocktail.strTags?.split(',').map((tag) => tag.trim()).toList();
-      translatedIngredients = widget.cocktail.getIngredientsWithMeasures();
+    } else if (widget.cocktail != null) {
+      translatedAlternateName = widget.cocktail.strDrinkAlternate ?? "N/A";
+      translatedCategory = widget.cocktail.category ?? "N/A";
+      translatedAlcohol = widget.cocktail.alcohol ?? "N/A";
+      translatedGlass = widget.cocktail.strGlass ?? "N/A";
+      translatedInstructions = widget.cocktail.instructions ?? "N/A";
+      translatedTags = widget.cocktail.strTags
+              ?.split(',')
+              .map((tag) => tag.trim())
+              .toList() ??
+          [];
+      translatedIngredients =
+          widget.cocktail.getIngredientsWithMeasures() ?? [];
     }
     setState(() {});
   }
 
   Future<String?> _translateText(String? text) async {
-    if (text == null || text.isEmpty)
-      return text; // Retorna texto original se for nulo ou vazio
-    if (RegExp(r'^\d+$').hasMatch(text))
-      return text; // Se for número, retorna ele sem tradução
+    if (text == null || text.isEmpty) return text;
+    if (RegExp(r'^\d+$').hasMatch(text)) return text;
 
     try {
       final translation =
@@ -70,7 +87,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       return translation.text;
     } catch (e) {
       print("Erro ao traduzir: $e");
-      return text; // Retorna o texto original se houver erro
+      return text;
     }
   }
 
@@ -83,7 +100,8 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   }
 
   Future<List<Map<String, String>>> _translateIngredients(
-      List<Map<String, String>> ingredients) async {
+      List<Map<String, String>>? ingredients) async {
+    if (ingredients == null) return [];
     final translatedIngredients =
         await Future.wait(ingredients.map((ingredient) async {
       final translatedIngredient =
@@ -92,8 +110,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       return {
         'ingredient': translatedIngredient ?? ingredient['ingredient']!,
         'measure': translatedMeasure ?? ingredient['measure']!,
-        'originalIngredient':
-            ingredient['ingredient']!, // Manter o nome original do ingrediente
+        'originalIngredient': ingredient['ingredient']!,
       };
     }));
     return translatedIngredients;
