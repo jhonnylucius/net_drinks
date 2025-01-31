@@ -117,7 +117,6 @@ class MyApp extends StatelessWidget {
               strInstructions: 'Mix ingredients',
               ingredients: ['Ingredient1', 'Ingredient2'],
               measures: ['1 oz', '2 oz'],
-              name: 'Example Name',
             ),
           ),
         ),
