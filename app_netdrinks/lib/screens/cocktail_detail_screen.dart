@@ -110,7 +110,8 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       return {
         'ingredient': translatedIngredient ?? ingredient['ingredient']!,
         'measure': translatedMeasure ?? ingredient['measure']!,
-        'originalIngredient': ingredient['ingredient']!,
+        'originalIngredient':
+            ingredient['ingredient']!, // Sempre usa o nome original
       };
     }));
     return translatedIngredients;
@@ -248,7 +249,12 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                 ),
                 SizedBox(height: 8.0),
                 if (translatedIngredients != null)
-                  ...translatedIngredients!.map((ingredient) {
+                  ...translatedIngredients!
+                      .where((ingredient) =>
+                          ingredient['ingredient'] != null &&
+                          ingredient['ingredient']!
+                              .isNotEmpty) // Filtra ingredientes válidos
+                      .map((ingredient) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                       child: Row(
@@ -257,7 +263,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                           SizedBox(width: 8.0),
                           Expanded(
                             child: Text(
-                              '${ingredient['ingredient']} - ${ingredient['measure']}',
+                              '${ingredient['ingredient']} - ${ingredient['measure'] ?? 'To taste'}',
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
