@@ -25,7 +25,6 @@ class Cocktail {
     this.strDrinkThumb,
     required this.ingredients,
     required this.measures,
-    required String name,
   });
 
   factory Cocktail.fromJson(Map<String, dynamic> json) {
@@ -53,7 +52,6 @@ class Cocktail {
       strDrinkThumb: json['strDrinkThumb'] as String?,
       ingredients: ingredients,
       measures: measures,
-      name: json['strDrink'] ?? '',
     );
   }
 
@@ -106,7 +104,6 @@ class Cocktail {
       strDrinkThumb: strDrinkThumb ?? this.strDrinkThumb,
       ingredients: ingredients ?? this.ingredients,
       measures: measures ?? this.measures,
-      name: '',
     );
   }
 
@@ -119,8 +116,8 @@ class Cocktail {
   String get glass => strGlass ?? '';
   String get instructions => strInstructions;
   String get tags => strTags ?? '';
-  String get ingredientListString => ingredients.join(', ');
-  String get measureListString => measures.join(', ');
+  String get ingredientListString => ingredients.whereType<String>().join(', ');
+  String get measureListString => measures.whereType<String>().join(', ');
   String get iba => strIBA ?? '';
 
   // Validações
@@ -141,21 +138,22 @@ class Cocktail {
   // Métodos Utilitários Adicionais
   String getIngredientImageUrl(String ingredient,
       {ImageSize size = ImageSize.medium}) {
+    final sanitizedIngredient = _sanitizeIngredientName(ingredient);
     final sizeStr = size == ImageSize.small
         ? '-Small'
         : size == ImageSize.medium
             ? '-Medium'
             : '';
-    return 'https://www.thecocktaildb.com/images/ingredients/$ingredient$sizeStr.png';
+    return 'https://www.thecocktaildb.com/images/ingredients/$sanitizedIngredient$sizeStr.png';
   }
 
   List<Map<String, String>> getIngredientsWithMeasures() {
     List<Map<String, String>> result = [];
     for (int i = 0; i < ingredients.length; i++) {
-      if (ingredients[i] != null) {
+      if (ingredients[i] != null && ingredients[i]!.isNotEmpty) {
         result.add({
           'ingredient': ingredients[i]!,
-          'measure': measures[i] ?? 'To taste'
+          'measure': measures[i] ?? 'To taste',
         });
       }
     }
@@ -163,7 +161,12 @@ class Cocktail {
   }
 
   String getFormattedInstructions() {
-    return instructions.split('. ').map((s) => '• $s').join('\n');
+    if (strInstructions.isEmpty) return '';
+    return strInstructions.split('. ').map((s) => '• $s').join('\n');
+  }
+
+  String _sanitizeIngredientName(String ingredient) {
+    return ingredient.replaceAll(' ', '%20');
   }
 
   @override
@@ -176,10 +179,9 @@ class Cocktail {
   @override
   int get hashCode => idDrink.hashCode;
 
-  get length => null;
-
   @override
-  String toString() => 'Cocktail(name: $name, category: $category)';
+  String toString() =>
+      'Cocktail(id: $idDrink, name: $name, category: $category, imageUrl: $imageUrl)';
 }
 
 enum ImageSize {
