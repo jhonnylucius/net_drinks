@@ -131,7 +131,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      leading: Container(
+                      leading: SizedBox(
                         width: 80,
                         height: 80,
                         child: Image.network(
