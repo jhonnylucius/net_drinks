@@ -49,6 +49,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
     }
   }
 
+  //ajustes para tradução das instruções dos drinks
   Future<void> _translateContent() async {
     if (_selectedLanguage != 'en' && widget.cocktail != null) {
       translatedAlternateName =
@@ -108,7 +109,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
         'ingredient': translatedIngredient ?? ingredient['ingredient']!,
         'measure': translatedMeasure ?? ingredient['measure']!,
         'originalIngredient':
-            ingredient['ingredient']!, // Sempre usa o nome original
+            ingredient['ingredient']!, // corrigido bug para tradução indevida
       };
     }));
     return translatedIngredients;
