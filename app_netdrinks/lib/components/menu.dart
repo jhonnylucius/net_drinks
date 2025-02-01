@@ -14,18 +14,18 @@ class Menu extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(FlutterI18n.translate(context, 'menu.confirm_delete')),
+        title: Text(FlutterI18n.translate(context, 'Confirmar a exclusão')),
         content: TextField(
           controller: senhaController,
           obscureText: true,
           decoration: InputDecoration(
-            labelText: FlutterI18n.translate(context, 'menu.enter_password'),
+            labelText: FlutterI18n.translate(context, 'Digite sua senha'),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(FlutterI18n.translate(context, 'menu.cancel')),
+            child: Text(FlutterI18n.translate(context, 'Cancelar')),
           ),
           TextButton(
             onPressed: () async {
@@ -44,7 +44,7 @@ class Menu extends StatelessWidget {
                 Navigator.of(context).pushReplacementNamed('/login');
               }
             },
-            child: Text(FlutterI18n.translate(context, 'menu.delete')),
+            child: Text(FlutterI18n.translate(context, 'Excluir')),
           ),
         ],
       ),
@@ -71,7 +71,7 @@ class Menu extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.home),
-            title: Text(FlutterI18n.translate(context, 'menu.home')),
+            title: Text(FlutterI18n.translate(context, 'Home')),
             onTap: () {
               Navigator.pushNamed(context, '/home');
             },
