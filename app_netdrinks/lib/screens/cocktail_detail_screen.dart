@@ -16,7 +16,7 @@ class CocktailDetailScreen extends StatefulWidget {
 }
 
 class CocktailDetailScreenState extends State<CocktailDetailScreen> {
-  String _selectedLanguage = 'pt'; // Iniciar com o idioma português
+  String _selectedLanguage = 'pt';
   final translator = GoogleTranslator();
   final CocktailController controller = Get.find<CocktailController>();
 
@@ -28,15 +28,17 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   List<String>? translatedTags;
   List<Map<String, String>>? translatedIngredients;
 
+  // Adicionado o TextEditingController como variável da classe
+  final TextEditingController _myVersionController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+    controller.loadMyVersion(widget.cocktail.idDrink);
     if (widget.cocktail != null) {
       _translateContent();
     } else {
-      // Handle the case where cocktail is null
       Logger().e("Cocktail data is null");
-      // You can set default values or show an error message to the user
       setState(() {
         translatedAlternateName = "N/A";
         translatedCategory = "N/A";
@@ -49,7 +51,13 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
     }
   }
 
-  //ajustes para tradução das instruções dos drinks
+  @override
+  void dispose() {
+    // Liberar o controller quando o widget for descartado
+    _myVersionController.dispose();
+    super.dispose();
+  }
+
   Future<void> _translateContent() async {
     if (_selectedLanguage != 'en' && widget.cocktail != null) {
       translatedAlternateName =
@@ -108,8 +116,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       return {
         'ingredient': translatedIngredient ?? ingredient['ingredient']!,
         'measure': translatedMeasure ?? ingredient['measure']!,
-        'originalIngredient':
-            ingredient['ingredient']!, // corrigido bug para tradução indevida
+        'originalIngredient': ingredient['ingredient']!,
       };
     }));
     return translatedIngredients;
@@ -250,8 +257,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                   ...translatedIngredients!
                       .where((ingredient) =>
                           ingredient['ingredient'] != null &&
-                          ingredient['ingredient']!
-                              .isNotEmpty) // Filtra ingredientes válidos
+                          ingredient['ingredient']!.isNotEmpty)
                       .map((ingredient) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -284,17 +290,85 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     );
                   }),
                 SizedBox(height: 16.0),
-                Text(
-                  '${FlutterI18n.translate(context, "instructions")}:',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.redAccent,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Row(
+                  children: [
+                    Text(
+                      '${FlutterI18n.translate(context, "instructions")}:',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    SizedBox(width: 8.0),
+                    Icon(
+                      Icons.favorite,
+                      color: Colors.redAccent,
+                    ),
+                  ],
                 ),
                 SizedBox(height: 8.0),
                 Text(
                   translatedInstructions ?? '',
                   style: TextStyle(color: Colors.white),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    Text(
+                      'Minha Versão',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      final myVersion = controller.myVersion.value;
+                      if (myVersion != null) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                myVersion.text,
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.redAccent),
+                              onPressed: () => controller
+                                  .deleteMyVersion(widget.cocktail.idDrink),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return TextField(
+                          controller:
+                              _myVersionController, // Use o controller da classe
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'Adicione sua versão da receita...',
+                            hintStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.save, color: Colors.redAccent),
+                              onPressed: () {
+                                if (_myVersionController.text.isNotEmpty) {
+                                  controller.saveMyVersion(
+                                    widget.cocktail.idDrink,
+                                    _myVersionController
+                                        .text, // Use o controller para pegar o valor
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          maxLines: 3,
+                        );
+                      }
+                    }),
+                  ],
                 ),
                 SizedBox(height: 16.0),
                 Row(
