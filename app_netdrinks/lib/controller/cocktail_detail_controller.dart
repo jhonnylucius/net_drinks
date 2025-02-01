@@ -19,18 +19,18 @@ class CocktailController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchPopularCocktails();
+    fetchAllCocktails(); // Carrega todos os drinks
     loadFavorites();
   }
 
-  Future<void> fetchPopularCocktails() async {
+  Future<void> fetchAllCocktails() async {
     try {
       _loading.value = true;
-      final result = await repository.getPopularCocktails();
+      final result = await repository.getAllCocktails(); // Método adicionado
       _cocktails.assignAll(result);
-      Logger().e('Cocktails fetched: ${_cocktails.length}');
+      Logger().e('All cocktails fetched: ${_cocktails.length}');
     } catch (e) {
-      Logger().e('Error fetching cocktails: $e');
+      Logger().e('Error fetching all cocktails: $e');
     } finally {
       _loading.value = false;
     }
