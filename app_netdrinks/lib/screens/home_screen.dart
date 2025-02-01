@@ -4,6 +4,7 @@ import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
@@ -23,7 +24,7 @@ class HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
   late final CocktailController controller;
 
-  double _viewportFraction = 0.7; //Initial default value
+  double _viewportFraction = 0.7;
 
   @override
   void initState() {
@@ -45,24 +46,18 @@ class HomeScreenState extends State<HomeScreen> {
 
     if (newViewportFraction != _viewportFraction) {
       _viewportFraction = newViewportFraction;
-      //remove old listener
       pageController.removeListener(_onPageChanged);
-      //Dispose of the old controller
       pageController.dispose();
-      //recreate controller with new viewportFraction
       _initializePageController();
-      //reset the current page
       _currentPage.value = 0;
     }
   }
 
-// Método chamado quando a página do PageView muda.
   void _onPageChanged() {
     int page = pageController.page?.round() ?? 0;
     _currentPage.value = page;
   }
 
-  // Corrige o método de navegação
   void _navigateToDetails(Cocktail cocktail) {
     Get.to(() => CocktailDetailScreen(cocktail: cocktail));
   }
@@ -70,59 +65,42 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Estende o corpo do Scaffold para trás da AppBar.
       extendBodyBehindAppBar: true,
-      // Define a AppBar da tela.
       appBar: AppBar(
-        // Define a cor de fundo da AppBar com transparência.
         backgroundColor: Colors.black.withAlpha(179),
-        // Remove a sombra da AppBar.
         elevation: 0,
-        // Define o título da AppBar baseado no estado 'showFavorites'.
         title: Text(widget.showFavorites
             ? FlutterI18n.translate(context, 'Favoritos')
             : FlutterI18n.translate(context, 'NetDrinks')),
-        // Define o botão de menu lateral.
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
-            // Abre o menu lateral quando o botão é pressionado.
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        // Define os botões de ação da AppBar.
         actions: [
-          // Se 'showFavorites' for true, mostra o botão de voltar para a Home.
           if (widget.showFavorites)
             IconButton(
               icon: const Icon(Icons.home),
-              // Navega para a tela Home.
               onPressed: () =>
                   Navigator.of(context).pushReplacementNamed('/home'),
             ),
-          // Botão de pesquisa.
           IconButton(
             icon: const Icon(Icons.search),
-            // Navega para a tela de pesquisa.
             onPressed: () => Get.toNamed('/search'),
           ),
         ],
       ),
-      // Define o menu lateral.
       drawer: Menu(user: widget.user),
-      // Define o corpo da tela, que é um Obx para reatividade do GetX.
       body: Obx(() {
-        // Se estiver carregando, mostra um indicador de carregamento.
         if (controller.loading) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
-        // Determina quais drinks exibir com base no estado 'showFavorites'.
         final displayCocktails = widget.showFavorites
             ? controller.getFavoriteCocktails()
             : controller.cocktails;
 
-        // Se não houver drinks favoritos e 'showFavorites' for true, mostra uma mensagem.
         if (displayCocktails.isEmpty && widget.showFavorites) {
           return Center(
             child: Text(
@@ -134,24 +112,17 @@ class HomeScreenState extends State<HomeScreen> {
           );
         }
 
-        // Retorna um Stack para sobrepor os elementos da tela.
         return Stack(
           fit: StackFit.expand,
           children: [
-            // Um Positioned.fill para ocupar todo o espaço da tela.
             Positioned.fill(
               child: ValueListenableBuilder<int>(
                 valueListenable: _currentPage,
                 builder: (context, currentIndex, _) {
-                  // Se não houver drinks, retorna um Container vazio.
                   if (displayCocktails.isEmpty) return Container();
-
-                  // Evita um erro de índice se currentIndex for maior que o tamanho da lista
                   if (currentIndex >= displayCocktails.length) {
-                    return Container(); // Evita erro de índice
+                    return Container();
                   }
-
-                  // Mostra uma imagem de fundo que corresponde ao drink selecionado
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
                     child: Container(
@@ -169,7 +140,6 @@ class HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
-            // Um Positioned.fill para criar um efeito de gradiente sobre a imagem de fundo.
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -187,12 +157,75 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            // Um SafeArea para evitar sobreposição com elementos da interface do sistema.
+            if (kIsWeb)
+              Positioned.fill(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(left: 16),
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                          onPressed: () {
+                            if (pageController.page == 0) {
+                              pageController.animateToPage(
+                                displayCocktails.length - 1,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              );
+                            } else {
+                              pageController.previousPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(right: 16),
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                          onPressed: () {
+                            if (pageController.page ==
+                                displayCocktails.length - 1) {
+                              pageController.animateToPage(
+                                0,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              );
+                            } else {
+                              pageController.nextPage(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Exibe o nome do drink selecionado.
                   ValueListenableBuilder<int>(
                     valueListenable: _currentPage,
                     builder: (context, currentIndex, _) {
@@ -218,7 +251,6 @@ class HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  // Define o PageView para exibir os cards de drinks.
                   SizedBox(
                     height: 200,
                     child: PageView.builder(
@@ -255,9 +287,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    //remove old listener
     pageController.removeListener(_onPageChanged);
-    // Libera o PageController ao descartar o widget.
     pageController.dispose();
     super.dispose();
   }
