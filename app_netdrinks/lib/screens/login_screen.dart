@@ -3,6 +3,7 @@ import 'package:app_netdrinks/screens/home_screen.dart';
 import 'package:app_netdrinks/screens/register_screen.dart';
 import 'package:app_netdrinks/services/auth_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
@@ -26,10 +27,32 @@ class LoginScreen extends StatelessWidget {
             image: AssetImage("assets/background_login.jpg"),
             fit: BoxFit.cover,
           ),
+          border: Border.all(color: Colors.black, width: 2.0),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black54,
+              offset: Offset(4, 4),
+              blurRadius: 4,
+            ),
+            BoxShadow(
+              color: Colors.black,
+              offset: Offset(2, 2),
+              blurRadius: 2,
+              spreadRadius: 1,
+            ),
+            BoxShadow(
+              color: Colors.grey.withAlpha((0.5 * 255).toInt()),
+              offset: Offset(-2, -2),
+              blurRadius: 2,
+              spreadRadius: 1,
+            ),
+          ],
         ),
         child: Center(
           child: SingleChildScrollView(
             child: Container(
+              width: kIsWeb ? 400 : null, // Ajuste a largura para a versão web
               margin: EdgeInsets.symmetric(horizontal: 24),
               padding: EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -40,10 +63,33 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset(
-                    'assets/Icon-192.png',
-                    width: 100,
-                    height: 100,
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 2.0),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset(2, 2),
+                          blurRadius: 2,
+                          spreadRadius: 1,
+                        ),
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          offset: Offset(-2, -2),
+                          blurRadius: 2,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/Icon-192.png',
+                        width: 100,
+                        height: 100,
+                      ),
+                    ),
                   ),
                   SizedBox(height: 16.0),
                   TextField(
@@ -57,6 +103,7 @@ class LoginScreen extends StatelessWidget {
                   TextField(
                     obscureText: true,
                     controller: _senhaController,
+                    style: TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText:
                           FlutterI18n.translate(context, "login.password"),
