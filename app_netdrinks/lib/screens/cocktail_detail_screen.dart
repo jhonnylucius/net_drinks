@@ -3,6 +3,7 @@ import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_i18n/flutter_i18n.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:translator/translator.dart';
 
 class CocktailDetailScreen extends StatefulWidget {
@@ -34,7 +35,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       _translateContent();
     } else {
       // Handle the case where cocktail is null
-      print("Cocktail data is null");
+      Logger().e("Cocktail data is null");
       // You can set default values or show an error message to the user
       setState(() {
         translatedAlternateName = "N/A";
@@ -61,18 +62,14 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       translatedIngredients = await _translateIngredients(
           widget.cocktail.getIngredientsWithMeasures());
     } else if (widget.cocktail != null) {
-      translatedAlternateName = widget.cocktail.strDrinkAlternate ?? "N/A";
-      translatedCategory = widget.cocktail.category ?? "N/A";
-      translatedAlcohol = widget.cocktail.alcohol ?? "N/A";
-      translatedGlass = widget.cocktail.strGlass ?? "N/A";
-      translatedInstructions = widget.cocktail.instructions ?? "N/A";
-      translatedTags = widget.cocktail.strTags
-              ?.split(',')
-              .map((tag) => tag.trim())
-              .toList() ??
-          [];
-      translatedIngredients =
-          widget.cocktail.getIngredientsWithMeasures() ?? [];
+      translatedAlternateName = widget.cocktail.strDrinkAlternate;
+      translatedCategory = widget.cocktail.category;
+      translatedAlcohol = widget.cocktail.alcohol;
+      translatedGlass = widget.cocktail.strGlass;
+      translatedInstructions = widget.cocktail.instructions;
+      translatedTags =
+          widget.cocktail.strTags?.split(',').map((tag) => tag.trim()).toList();
+      translatedIngredients = widget.cocktail.getIngredientsWithMeasures();
     }
     setState(() {});
   }
@@ -86,7 +83,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
           await translator.translate(text, to: _selectedLanguage);
       return translation.text;
     } catch (e) {
-      print("Erro ao traduzir: $e");
+      Logger().e("Erro ao traduzir: $e");
       return text;
     }
   }
