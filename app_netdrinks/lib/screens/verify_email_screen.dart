@@ -61,8 +61,8 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                FlutterI18n.translate(
-                    context, 'Um e-mail de verificação foi enviado para',
+                FlutterI18n.translate(context,
+                    'Um e-mail de verificação foi enviado para {email}',
                     translationParams: {'email': widget.user.email!}),
                 textAlign: TextAlign.center,
               ),
