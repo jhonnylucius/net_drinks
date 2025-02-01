@@ -1,6 +1,7 @@
 import 'package:app_netdrinks/adapters/cocktail_adapter.dart';
 import 'package:app_netdrinks/bindings/app_bindings.dart';
 import 'package:app_netdrinks/bindings/search_binding.dart';
+import 'package:app_netdrinks/firebase_options.dart';
 import 'package:app_netdrinks/models/cocktail.dart';
 import 'package:app_netdrinks/screens/cocktail_detail_screen.dart';
 import 'package:app_netdrinks/screens/home_screen.dart';
@@ -23,7 +24,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializar Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   // Inicializar Hive
   await Hive.initFlutter();
@@ -180,9 +183,11 @@ class InitialScreen extends StatefulWidget {
 
 class InitialScreenState extends State<InitialScreen> {
   final bool termsAccepted = false;
+  late PageController _pageController;
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     _checkTermsAccepted();
   }
 
@@ -231,8 +236,45 @@ class InitialScreenState extends State<InitialScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              Container(
+                  color: Colors.red,
+                  child: Center(
+                      child: Text(
+                    "Pagina 1",
+                    style: TextStyle(color: Colors.white),
+                  ))),
+              Container(
+                  color: Colors.blue,
+                  child: Center(
+                      child: Text(
+                    "Pagina 2",
+                    style: TextStyle(color: Colors.white),
+                  ))),
+              Container(
+                  color: Colors.green,
+                  child: Center(
+                      child: Text(
+                    "Pagina 3",
+                    style: TextStyle(color: Colors.white),
+                  ))),
+            ],
+          ),
+          SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
