@@ -8,6 +8,26 @@ class CocktailRepository {
 
   CocktailRepository(this._api, this._cache);
 
+  Future<List<Cocktail>> getAllCocktails() async {
+    try {
+      // Verificar se há dados em cache
+      if (_cache.isNotEmpty) {
+        return _cache.values.toList();
+      }
+
+      // Buscar todos os cocktails da API
+      final cocktails = await _api.getAllCocktails();
+
+      // Salvar no cache
+      await _cache.clear();
+      await _cache.addAll(cocktails);
+
+      return cocktails;
+    } catch (e) {
+      throw Exception('Falha ao carregar todos os cocktails: $e');
+    }
+  }
+
   Future<List<Cocktail>> getPopularCocktails() async {
     try {
       // Tentar pegar do cache primeiro
