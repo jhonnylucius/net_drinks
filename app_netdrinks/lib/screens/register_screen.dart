@@ -46,23 +46,27 @@ class RegisterScreen extends StatelessWidget {
                     SizedBox(height: 8.0),
                     TextField(
                       controller: _nomeController,
+                      style: TextStyle(color: Colors.black),
                       decoration: InputDecoration(labelText: 'Nome'),
                     ),
                     SizedBox(height: 8.0),
                     TextField(
                       controller: _emailController,
+                      style: TextStyle(color: Colors.black),
                       decoration: InputDecoration(labelText: 'E-mail'),
                     ),
                     SizedBox(height: 8.0),
                     TextField(
                       obscureText: true,
                       controller: _senhaController,
+                      style: TextStyle(color: Colors.black),
                       decoration: InputDecoration(labelText: 'Senha'),
                     ),
                     SizedBox(height: 8.0),
                     TextField(
                       obscureText: true,
                       controller: _confirmarSenhaController,
+                      style: TextStyle(color: Colors.black),
                       decoration: InputDecoration(labelText: 'Confirmar Senha'),
                     ),
                     SizedBox(height: 8.0),
