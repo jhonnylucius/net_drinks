@@ -1,3 +1,10 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/flutter/flutter-original.svg" width="70" />
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/dart/dart-original.svg" width="70" />
+  
+
+</div>
+
 # 🍹 Net Drinks App
 
 Bem-vindo ao **Net Drinks App**! Este aplicativo foi desenvolvido com o objetivo de ajudar os usuários a aprenderem a fazer coquetéis incríveis. Além disso, foi uma excelente oportunidade para praticar e aprimorar habilidades em **Dart** e **Flutter**.
