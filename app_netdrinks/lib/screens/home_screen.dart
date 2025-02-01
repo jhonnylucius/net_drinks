@@ -19,28 +19,52 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  // Define um PageController para controlar a navegação entre os cards de drinks.
-  final PageController pageController = PageController(viewportFraction: 0.7);
-  // Um ValueNotifier para rastrear qual página está atualmente visível.
+  late PageController pageController;
   final ValueNotifier<int> _currentPage = ValueNotifier<int>(0);
-  // Controlador para a lógica de negócios relacionada aos drinks.
   late final CocktailController controller;
+
+  double _viewportFraction = 0.7; //Initial default value
 
   @override
   void initState() {
     super.initState();
-    // Inicializa o controlador.
     controller = Get.find<CocktailController>();
-    // Adiciona um listener ao PageController para atualizar _currentPage.
+    _initializePageController();
+  }
+
+  void _initializePageController() {
+    pageController = PageController(viewportFraction: _viewportFraction);
     pageController.addListener(_onPageChanged);
   }
 
-  // Método chamado quando a página do PageView muda.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final newViewportFraction = screenWidth > 768 ? 0.3 : 0.7;
+
+    if (newViewportFraction != _viewportFraction) {
+      _viewportFraction = newViewportFraction;
+      //remove old listener
+      pageController.removeListener(_onPageChanged);
+      //Dispose of the old controller
+      pageController.dispose();
+      //recreate controller with new viewportFraction
+      _initializePageController();
+      //reset the current page
+      _currentPage.value = 0;
+    }
+  }
+
+// Método chamado quando a página do PageView muda.
   void _onPageChanged() {
-    // Obtém o índice da página atual. Se for nulo, usa 0 como padrão.
     int page = pageController.page?.round() ?? 0;
-    // Atualiza o valor do ValueNotifier _currentPage.
     _currentPage.value = page;
+  }
+
+  // Corrige o método de navegação
+  void _navigateToDetails(Cocktail cocktail) {
+    Get.to(() => CocktailDetailScreen(cocktail: cocktail));
   }
 
   @override
@@ -200,16 +224,16 @@ class HomeScreenState extends State<HomeScreen> {
                     child: PageView.builder(
                       controller: pageController,
                       itemCount: displayCocktails.length,
+                      onPageChanged: (index) {
+                        _currentPage.value = index;
+                      },
                       itemBuilder: (context, index) {
                         return AnimatedScale(
-                          // Aplica uma animação de escala ao card selecionado.
                           scale: _currentPage.value == index ? 1.0 : 0.8,
                           duration: const Duration(milliseconds: 300),
                           child: GestureDetector(
-                            // Navega para a tela de detalhes do drink ao tocar no card.
                             onTap: () =>
                                 _navigateToDetails(displayCocktails[index]),
-                            // Componente para exibir o card de drink
                             child: CocktailCard(
                               cocktail: displayCocktails[index],
                               user: widget.user.uid,
@@ -231,14 +255,10 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    //remove old listener
+    pageController.removeListener(_onPageChanged);
     // Libera o PageController ao descartar o widget.
     pageController.dispose();
     super.dispose();
-  }
-
-  // Método para navegar para a tela de detalhes do drink.
-  Widget _navigateToDetails(Cocktail cocktail) {
-    Get.to(() => CocktailDetailScreen(cocktail: cocktail));
-    return const SizedBox.shrink();
   }
 }
