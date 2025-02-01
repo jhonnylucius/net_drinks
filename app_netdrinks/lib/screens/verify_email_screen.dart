@@ -49,8 +49,8 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false, // prevent back
+    return PopScope(
+      canPop: false, // prevent back
       child: Scaffold(
         appBar: AppBar(
           title: Text(FlutterI18n.translate(context, 'Verificar E-mail')),
@@ -88,7 +88,7 @@ class VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   }
                 },
                 child: Text(FlutterI18n.translate(
-                    context, 'E-mail de verificação reenviado com sucesso!')),
+                    context, 'E-mail de verificação enviado com sucesso!')),
               ),
             ],
           ),
