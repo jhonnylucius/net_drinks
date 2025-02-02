@@ -56,10 +56,32 @@ class CocktailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.network(cocktail['imageUrl']),
-          Text(cocktail['name']),
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+            child: Image.network(
+              cocktail['imageUrl'],
+              height: 180, // Aumentar altura da imagem
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              cocktail['name'],
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
