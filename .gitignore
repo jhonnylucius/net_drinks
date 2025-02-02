@@ -15,3 +15,4 @@ app_netdrinks/lib/models/cocktails13_api.dart
 app_netdrinks/lib/models/cocktail_api.dart
 app_netdrinks/dartanalyzer
 app_netdrinks/lib/services/search_service.dart
+app_netdrinks/netdrinks.keystore
