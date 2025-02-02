@@ -1,6 +1,7 @@
 import 'package:app_netdrinks/controller/search_controller.dart' as netdrink;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -131,12 +132,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: ListTile(
-                      leading: SizedBox(
-                        width: 80,
-                        height: 80,
-                        child: Image.network(
-                          cocktail.imageUrl,
-                          fit: BoxFit.cover,
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: SizedBox(
+                          width: 100, // Aumentado de 80 para 100
+                          height: 155, // Aumentado de 80 para 100
+                          child: Image.network(
+                            cocktail.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       title: Text(
@@ -153,7 +157,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           Get.toNamed('/cocktail-detail', arguments: cocktail);
                         } else {
                           // Caso contrário, busca detalhes antes de navegar
-                          print(
+                          Logger().e(
                               "Buscando detalhes para ID: ${cocktail.idDrink}");
                           await controller.fetchCocktailDetailsAndNavigate(
                               cocktail.idDrink);
