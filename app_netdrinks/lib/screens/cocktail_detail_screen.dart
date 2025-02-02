@@ -224,10 +224,13 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: Image.network(
-              widget.cocktail.imageUrl,
-              fit: BoxFit.cover,
-              height: 200,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.network(
+                widget.cocktail.imageUrl,
+                fit: BoxFit.cover,
+                height: 200,
+              ),
             ),
           ),
           SizedBox(height: 16.0),
