@@ -79,20 +79,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   void initState() {
     super.initState();
     controller.loadMyVersion(widget.cocktail.idDrink);
-    if (widget.cocktail != null) {
-      _translateContent();
-    } else {
-      Logger().e("Cocktail data is null");
-      setState(() {
-        translatedAlternateName = "N/A";
-        translatedCategory = "N/A";
-        translatedAlcohol = "N/A";
-        translatedGlass = "N/A";
-        translatedInstructions = "N/A";
-        translatedTags = [];
-        translatedIngredients = [];
-      });
-    }
+    _translateContent();
   }
 
   @override
@@ -102,7 +89,8 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   }
 
   Future<void> _translateContent() async {
-    if (_selectedLanguage != 'en' && widget.cocktail != null) {
+    // Remover esse bloco else que está sobrescrevendo as traduções
+    if (_selectedLanguage != 'en') {
       translatedAlternateName =
           await _translateText(widget.cocktail.strDrinkAlternate);
       translatedCategory = await _translateText(widget.cocktail.category);
@@ -113,7 +101,8 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       translatedTags = await _translateTags(widget.cocktail.strTags);
       translatedIngredients = await _translateIngredients(
           widget.cocktail.getIngredientsWithMeasures());
-    } else if (widget.cocktail != null) {
+    } else {
+      // Se for inglês, usar valores originais
       translatedAlternateName = widget.cocktail.strDrinkAlternate;
       translatedCategory = widget.cocktail.category;
       translatedAlcohol = widget.cocktail.alcohol;
@@ -123,6 +112,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
           widget.cocktail.strTags?.split(',').map((tag) => tag.trim()).toList();
       translatedIngredients = widget.cocktail.getIngredientsWithMeasures();
     }
+
     setState(() {});
   }
 
@@ -355,9 +345,9 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     ),
               ),
               SizedBox(width: 8.0),
-              Icon(
-                Icons.favorite,
-                color: Colors.redAccent,
+              Text(
+                '1 oz ou onça = 29,5735 ml(U) ou 28,4131 ml(UK)',
+                style: TextStyle(color: Colors.white, fontSize: 10.0),
               ),
             ],
           ),
