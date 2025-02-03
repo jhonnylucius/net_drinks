@@ -10,6 +10,7 @@ class SearchController extends GetxController {
   var maisRecentesResults = <Cocktail>[].obs;
   var dezAleatorioResults = <Cocktail>[].obs;
   var multiIngredientsResults = <Cocktail>[].obs;
+  final RxList<Cocktail> noAlcoolResults = <Cocktail>[].obs;
 
   Future<void> searchByFirstLetter(String letter) async {
     try {
@@ -19,6 +20,7 @@ class SearchController extends GetxController {
       maisRecentesResults.clear();
       dezAleatorioResults.clear();
       multiIngredientsResults.clear();
+      noAlcoolResults.clear();
 
       searchResults.value = await _searchService.searchByFirstLetter(letter);
     } finally {
@@ -29,14 +31,17 @@ class SearchController extends GetxController {
   Future<void> searchMultiIngredients(String ingredients) async {
     try {
       isLoading.value = true;
-      // Limpa os outros resultados
+      final locale = Get.locale?.languageCode ?? 'en';
+
+      // Limpar outros resultados primeiro
       searchResults.clear();
       popularResults.clear();
       maisRecentesResults.clear();
       dezAleatorioResults.clear();
+      noAlcoolResults.clear();
 
       multiIngredientsResults.value =
-          await _searchService.searchMultiIngredients(ingredients);
+          await _searchService.searchMultiIngredients(ingredients, locale);
     } finally {
       isLoading.value = false;
     }
@@ -50,6 +55,7 @@ class SearchController extends GetxController {
       maisRecentesResults.clear();
       dezAleatorioResults.clear();
       multiIngredientsResults.clear();
+      noAlcoolResults.clear();
 
       popularResults.value = await _searchService.searchPopular();
     } finally {
@@ -80,8 +86,24 @@ class SearchController extends GetxController {
       popularResults.clear();
       maisRecentesResults.clear();
       multiIngredientsResults.clear();
+      noAlcoolResults.clear();
 
       dezAleatorioResults.value = await _searchService.searchDezAleatorio();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> searchNoAlcool() async {
+    try {
+      isLoading.value = true;
+      // Limpa os outros resultados
+      searchResults.clear();
+      popularResults.clear();
+      maisRecentesResults.clear();
+      multiIngredientsResults.clear();
+
+      noAlcoolResults.value = await _searchService.searchNoAlcool();
     } finally {
       isLoading.value = false;
     }

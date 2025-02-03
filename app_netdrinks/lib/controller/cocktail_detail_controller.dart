@@ -29,7 +29,7 @@ class CocktailController extends GetxController {
   Future<void> fetchAllCocktails() async {
     try {
       _loading.value = true;
-      final result = await repository.getAllCocktails(); // Método adicionado
+      final result = await repository.getAllCocktails();
       _cocktails.assignAll(result);
       Logger().e('All cocktails fetched: ${_cocktails.length}');
     } catch (e) {

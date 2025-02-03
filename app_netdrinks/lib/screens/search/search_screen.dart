@@ -38,12 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
     controller.searchMultiIngredients(searchText);
   }
 
-  void _handlePopularSearch() {
-    _focusNodeFirstLetter.unfocus();
-    _focusNodeMultiIngredients.unfocus();
-    controller.searchPopular();
-  }
-
   void _handleMaisRecentesSearch() {
     _focusNodeFirstLetter.unfocus();
     _focusNodeMultiIngredients.unfocus();
@@ -54,6 +48,18 @@ class _SearchScreenState extends State<SearchScreen> {
     _focusNodeFirstLetter.unfocus();
     _focusNodeMultiIngredients.unfocus();
     controller.searchDezAleatorio();
+  }
+
+  void _handleNoAlcool() {
+    _focusNodeFirstLetter.unfocus();
+    _focusNodeMultiIngredients.unfocus();
+    controller.searchNoAlcool(); // <-- CORREÇÃO
+  }
+
+  void _handlePopularSearch() {
+    _focusNodeFirstLetter.unfocus();
+    _focusNodeMultiIngredients.unfocus();
+    controller.searchPopular();
   }
 
   @override
@@ -99,16 +105,20 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: _handlePopularSearch,
-            child: Text('Pesquisar Drinks Populares'),
-          ),
-          ElevatedButton(
             onPressed: _handleMaisRecentesSearch,
             child: Text('Pesquisar os Drinks mais recentes'),
           ),
           ElevatedButton(
             onPressed: _handleDezAleatorio,
             child: Text('Pesquisar 10 Drinks Aleatórios'),
+          ),
+          ElevatedButton(
+            onPressed: _handleNoAlcool,
+            child: Text('Pesquisar Drinks Sem Álcool'),
+          ),
+          ElevatedButton(
+            onPressed: _handlePopularSearch,
+            child: Text('Pesquisar Drinks Populares'),
           ),
           Expanded(
             child: Obx(() {
@@ -121,7 +131,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 ...controller.popularResults,
                 ...controller.maisRecentesResults,
                 ...controller.dezAleatorioResults,
-                ...controller.multiIngredientsResults
+                ...controller.multiIngredientsResults,
+                ...controller.noAlcoolResults,
               ];
 
               return ListView.builder(
@@ -135,8 +146,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: SizedBox(
-                          width: 100, // Aumentado de 80 para 100
-                          height: 155, // Aumentado de 80 para 100
+                          width: 100, // Aumentado
+                          height: 180, // Aumentado
                           child: Image.network(
                             cocktail.imageUrl,
                             fit: BoxFit.cover,

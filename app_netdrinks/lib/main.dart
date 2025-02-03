@@ -9,6 +9,7 @@ import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/search/search_results_screen.dart';
 import 'package:app_netdrinks/screens/search/search_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
+import 'package:app_netdrinks/services/ingredients_translation_service.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart' as widget;
 import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +23,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+// Aguarda o carregamento das traduções antes de iniciar o app
+  await IngredientsTranslationService.loadTranslations();
 
   // Inicializar Firebase
   await Firebase.initializeApp(
