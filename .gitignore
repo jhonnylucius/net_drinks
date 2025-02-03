@@ -17,3 +17,6 @@ app_netdrinks/dartanalyzer
 app_netdrinks/lib/services/search_service.dart
 app_netdrinks/netdrinks.keystore
 app_netdrinks/android/app/src/main/res/values/strings.xml
+app_netdrinks/lib/utils/generate_drinks_data.dart
+app_netdrinks/lib/utils/generate_ingredients_map.dart
+app_netdrinks/lib/utils/generate_special_drinks_data.dart
