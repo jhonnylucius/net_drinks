@@ -1,86 +1,64 @@
 import 'dart:convert';
 
-import 'package:diacritic/diacritic.dart';
+import 'package:diacritic/diacritic.dart'; // Adicione esta dependência no pubspec.yaml
 import 'package:flutter/services.dart';
 
 class IngredientsTranslationService {
   static Map<String, Map<String, String>>? _translations;
 
-  /// Carrega as traduções do arquivo JSON apenas se ainda não estiverem carregadas.
-  static Future<void> loadTranslations({bool forceReload = false}) async {
-    if (_translations != null && !forceReload) {
-      print('🔄 Traduções já carregadas.');
-      return;
-    }
+  static Future<void> loadTranslations() async {
     try {
       final jsonString =
           await rootBundle.loadString('assets/data/ingredients_map.json');
-      _translations =
-          Map<String, Map<String, String>>.from(json.decode(jsonString));
+      final Map<String, dynamic> jsonMap = json.decode(jsonString);
+
+      _translations = jsonMap.map((key, value) {
+        final Map<String, dynamic> innerMap = value as Map<String, dynamic>;
+        return MapEntry(key, innerMap.map((k, v) => MapEntry(k, v.toString())));
+      });
+
       print('✅ Traduções carregadas: ${_translations?.length} ingredientes');
-      print('Conteúdo das traduções: $_translations');
+      // Debug
+      _translations?.forEach((key, value) {
+        print('Chave: $key');
+        print('Valores: $value');
+      });
     } catch (e) {
-      print('❌ Erro ao carregar traduções: $e');
+      print('❌ Erro ao carregar JSON: $e');
       _translations = {};
     }
   }
 
-  /// Normaliza o texto removendo diacríticos, convertendo para minúsculas e removendo espaços.
   static String normalize(String text) {
     return removeDiacritics(text.toLowerCase().trim());
   }
 
-  /// Retorna o nome do ingrediente em inglês, dado o nome no idioma de origem.
   static String getEnglishName(String ingredient, String fromLang) {
     try {
-      if (_translations == null) {
-        print(
-            '⚠️ As traduções não foram carregadas ainda. Execute IngredientsTranslationService.loadTranslations() antes.');
+      if (_translations == null || _translations!.isEmpty) {
+        print('❌ JSON não carregado ou vazio');
         return ingredient;
       }
 
       if (fromLang == 'en') return ingredient;
-      if (fromLang != 'en' && fromLang != 'pt' && fromLang != 'es') {
-        print(
-            '⚠️ Idioma de origem inválido: $fromLang. Retornando o próprio valor.');
-        return ingredient;
-      }
 
-      final normalizedIngredient = normalize(ingredient);
-      print('🔍 Ingrediente digitado (normalizado): "$normalizedIngredient"');
+      final normalizedInput = normalize(ingredient);
+      print('🔍 Buscando: "$normalizedInput" (original: "$ingredient")');
 
       for (var entry in _translations!.entries) {
-        final valueFromLang = entry.value[fromLang];
-        print(
-            '   ➡️ Analisando entrada: chave="${entry.key}", $fromLang="${valueFromLang}"');
-        if (valueFromLang != null &&
-            normalize(valueFromLang) == normalizedIngredient) {
-          final englishTranslation = entry.value['en'];
-          print('✅ Encontrado: "$ingredient" -> "$englishTranslation"');
-          if (englishTranslation != null && englishTranslation.isNotEmpty) {
-            return englishTranslation;
-          }
-          return entry.key;
+        final fromLangValue = entry.value[fromLang];
+        if (fromLangValue != null &&
+            normalize(fromLangValue) == normalizedInput) {
+          final result = entry.value['en'] ?? entry.key;
+          print('✅ Tradução: $ingredient -> $result');
+          return result;
         }
       }
 
-      for (var entry in _translations!.entries) {
-        if (normalize(entry.key) == normalizedIngredient) {
-          final englishTranslation = entry.value['en'];
-          print(
-              '✅ Encontrado via chave: "${entry.key}" -> "$englishTranslation"');
-          if (englishTranslation != null && englishTranslation.isNotEmpty) {
-            return englishTranslation;
-          }
-          return entry.key;
-        }
-      }
-
-      print(
-          '⚠️ Não encontrou tradução para "$ingredient" em "$fromLang". Retornando o próprio valor.');
+      print('⚠️ Não encontrado: $ingredient');
       return ingredient;
     } catch (e) {
-      print('❌ Erro ao traduzir "$ingredient": $e');
+      print('❌ Erro: $e');
       return ingredient;
     }
   }
