@@ -53,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void _handleNoAlcool() {
     _focusNodeFirstLetter.unfocus();
     _focusNodeMultiIngredients.unfocus();
-    controller.searchNoAlcool(); // <-- CORREÇÃO
+    controller.searchNoAlcool();
   }
 
   void _handlePopularSearch() {
@@ -102,6 +102,17 @@ class _SearchScreenState extends State<SearchScreen> {
                   onPressed: _handleMultiIngredientsSearch,
                 ),
               ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Para melhores resultados, faça sua pesquisa em inglês.\nEstamos trabalhando para adicionar suporte a mais idiomas.',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
           ElevatedButton(

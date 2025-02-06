@@ -27,6 +27,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   final GlobalKey _screenShotKey = GlobalKey();
   String _selectedLanguage = 'pt';
   final translator = GoogleTranslator();
+
   final CocktailController controller = Get.find<CocktailController>();
 
   String? translatedAlternateName;
@@ -38,42 +39,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   List<Map<String, String>>? translatedIngredients;
 
   final TextEditingController _myVersionController = TextEditingController();
-
-  Future<void> _shareScreen() async {
-    try {
-      await Future.delayed(Duration(milliseconds: 100));
-
-      final boundary = _screenShotKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
-      if (boundary == null) {
-        Logger().e("RenderRepaintBoundary não encontrado");
-        return;
-      }
-
-      final image = await boundary.toImage(pixelRatio: 3.0);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      final bytes = byteData?.buffer.asUint8List();
-
-      if (bytes != null) {
-        if (kIsWeb) {
-          // Download direto no web
-          base64Encode(bytes);
-        } else {
-          // Share no mobile
-          final tempDir = await getTemporaryDirectory();
-          final file = await File('${tempDir.path}/drink.png').create();
-          await file.writeAsBytes(bytes);
-
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            text: 'Confira essa receita incrível de ${widget.cocktail.name}!',
-          );
-        }
-      }
-    } catch (e) {
-      Logger().e('Erro ao compartilhar: $e');
-    }
-  }
 
   @override
   void initState() {
@@ -89,7 +54,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
   }
 
   Future<void> _translateContent() async {
-    // Remover esse bloco else que está sobrescrevendo as traduções
     if (_selectedLanguage != 'en') {
       translatedAlternateName =
           await _translateText(widget.cocktail.strDrinkAlternate);
@@ -102,7 +66,6 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
       translatedIngredients = await _translateIngredients(
           widget.cocktail.getIngredientsWithMeasures());
     } else {
-      // Se for inglês, usar valores originais
       translatedAlternateName = widget.cocktail.strDrinkAlternate;
       translatedCategory = widget.cocktail.category;
       translatedAlcohol = widget.cocktail.alcohol;
@@ -147,12 +110,45 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
           await _translateText(ingredient['ingredient']);
       final translatedMeasure = await _translateText(ingredient['measure']);
       return {
-        'ingredient': translatedIngredient ?? ingredient['ingredient']!,
-        'measure': translatedMeasure ?? ingredient['measure']!,
-        'originalIngredient': ingredient['ingredient']!,
+        'ingredient': translatedIngredient ?? '',
+        'measure': translatedMeasure ?? '',
       };
     }));
     return translatedIngredients;
+  }
+
+  Future<void> _shareScreen() async {
+    try {
+      await Future.delayed(Duration(milliseconds: 100));
+
+      final boundary = _screenShotKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) {
+        Logger().e("RenderRepaintBoundary não encontrado");
+        return;
+      }
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final bytes = byteData?.buffer.asUint8List();
+
+      if (bytes != null) {
+        if (kIsWeb) {
+          base64Encode(bytes);
+        } else {
+          final tempDir = await getTemporaryDirectory();
+          final file = await File('${tempDir.path}/drink.png').create();
+          await file.writeAsBytes(bytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: 'Confira essa receita incrível de ${widget.cocktail.name}!',
+          );
+        }
+      }
+    } catch (e) {
+      Logger().e('Erro ao compartilhar: $e');
+    }
   }
 
   @override
@@ -160,47 +156,40 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.cocktail.name),
-        backgroundColor: Colors.black.withAlpha((0.7 * 255).toInt()),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share, color: Colors.redAccent),
+            icon: Icon(Icons.share),
             onPressed: _shareScreen,
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedLanguage,
-                icon: Icon(Icons.language,
-                    color: const Color.fromARGB(255, 185, 3, 3)),
-                dropdownColor: Colors.black,
-                items: [
-                  DropdownMenuItem(
-                    value: 'en',
-                    child:
-                        Text('English', style: TextStyle(color: Colors.white)),
-                  ),
-                  DropdownMenuItem(
-                    value: 'pt',
-                    child: Text('Português',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  DropdownMenuItem(
-                    value: 'es',
-                    child:
-                        Text('Español', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _selectedLanguage = newValue;
-                      _translateContent();
-                    });
-                  }
-                },
-                hint: Text('Idioma', style: TextStyle(color: Colors.white)),
-              ),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedLanguage,
+              icon: Icon(Icons.language, color: Colors.white),
+              dropdownColor: Colors.black,
+              items: [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text('English', style: TextStyle(color: Colors.white)),
+                ),
+                DropdownMenuItem(
+                  value: 'pt',
+                  child:
+                      Text('Português', style: TextStyle(color: Colors.white)),
+                ),
+                DropdownMenuItem(
+                  value: 'es',
+                  child: Text('Español', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedLanguage = newValue;
+                    _translateContent();
+                  });
+                }
+              },
+              hint: Text('Idioma', style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -218,6 +207,7 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
     if (translatedInstructions == null) {
       return Center(child: CircularProgressIndicator());
     }
+
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: Column(
@@ -315,44 +305,21 @@ class CocktailDetailScreenState extends State<CocktailDetailScreen> {
                     SizedBox(width: 8.0),
                     Expanded(
                       child: Text(
-                        '${ingredient['ingredient']} - ${ingredient['measure'] ?? 'To taste'}',
+                        '${ingredient['ingredient']} - ${ingredient['measure']}',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
-                    SizedBox(width: 8.0),
-                    if (ingredient['originalIngredient'] != null)
-                      SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: Image.network(
-                          widget.cocktail.getIngredientImageUrl(
-                              ingredient['originalIngredient']!),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.error, color: Colors.red);
-                          },
-                        ),
-                      ),
                   ],
                 ),
               );
             }),
-          SizedBox(height: 16.0),
-          Row(
-            children: [
-              Text(
-                '${FlutterI18n.translate(context, "instructions")}:',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              SizedBox(width: 8.0),
-              Text(
-                '1 oz ou onça = 29,5735 ml(U) ou 28,4131 ml(UK)',
-                style: TextStyle(color: Colors.white, fontSize: 10.0),
-              ),
-            ],
+          SizedBox(height: 8.0),
+          Text(
+            '${FlutterI18n.translate(context, "instructions")}:',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           SizedBox(height: 8.0),
           Text(

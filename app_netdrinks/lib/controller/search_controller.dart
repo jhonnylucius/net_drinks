@@ -31,17 +31,13 @@ class SearchController extends GetxController {
   Future<void> searchMultiIngredients(String ingredients) async {
     try {
       isLoading.value = true;
-      final locale = Get.locale?.languageCode ?? 'en';
 
       // Limpar outros resultados primeiro
       searchResults.clear();
-      popularResults.clear();
-      maisRecentesResults.clear();
-      dezAleatorioResults.clear();
-      noAlcoolResults.clear();
 
-      multiIngredientsResults.value =
-          await _searchService.searchMultiIngredients(ingredients, locale);
+      // Realizar pesquisa apenas em inglês
+      searchResults.value =
+          await _searchService.searchMultiIngredients(ingredients);
     } finally {
       isLoading.value = false;
     }

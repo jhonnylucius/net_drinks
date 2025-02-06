@@ -9,7 +9,6 @@ import 'package:app_netdrinks/screens/login_screen.dart';
 import 'package:app_netdrinks/screens/search/search_results_screen.dart';
 import 'package:app_netdrinks/screens/search/search_screen.dart';
 import 'package:app_netdrinks/screens/verify_email_screen.dart';
-import 'package:app_netdrinks/services/ingredients_translation_service.dart';
 import 'package:app_netdrinks/widgets/cocktail_card_widget.dart' as widget;
 import 'package:app_netdrinks/widgets/terms_of_service_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,26 +22,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-// Aguarda o carregamento das traduções antes de iniciar o app
-  await IngredientsTranslationService.loadTranslations();
-
-  // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Inicializar Hive
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Hive.initFlutter();
   Hive.registerAdapter(CocktailAdapter());
   await Hive.openBox<Cocktail>('cocktailBox');
 
+  // Verificar salvos
   final prefs = await SharedPreferences.getInstance();
-  final String? savedLanguage = prefs.getString('language');
-
-  if (savedLanguage != null) {
-    Get.updateLocale(Locale(savedLanguage));
-  }
+  prefs.getString('language');
 
   runApp(const MyApp());
 }
@@ -127,7 +114,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        // Adicionar as novas rotas de pesquisa
         GetPage(
           name: '/search',
           page: () => SearchScreen(),
@@ -136,7 +122,6 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/search-results',
           page: () => SearchResultsScreen(),
-          binding: SearchBinding(),
         ),
         GetPage(
           name: '/cocktail-detail',
@@ -146,9 +131,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFE50914), // Vermelho Netflix
+          seedColor: const Color.fromARGB(255, 204, 7, 17), // Vermelho Netflix
           brightness: Brightness.dark,
-          primary: const Color(0xFFE50914), // Vermelho Netflix
+          primary: const Color.fromARGB(255, 204, 7, 17), // Vermelho Netflix
           secondary: const Color(0xFFFFFFFF), // Branco
           surface: const Color(0xFF000000), // Preto
           onPrimary: const Color(0xFFFFFFFF), // Branco
@@ -158,7 +143,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF000000), // Preto
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF000000), // Preto
-          foregroundColor: Color(0xFFE50914), // Vermelho Netflix
+          foregroundColor: Color.fromARGB(255, 204, 7, 17), // Vermelho Netflix
         ),
         cardTheme: CardTheme(
           color: const Color(0xFF121212), // Preto mais claro
@@ -171,7 +156,8 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Color(0xFFFFFFFF)), // Branco
           bodyMedium: TextStyle(color: Color(0xFFFFFFFF)), // Branco
-          titleLarge: TextStyle(color: Color(0xFFE50914)), // Vermelho Netflix
+          titleLarge: TextStyle(
+              color: Color.fromARGB(255, 204, 7, 17)), // Vermelho Netflix
         ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -248,35 +234,27 @@ class InitialScreenState extends State<InitialScreen> {
             physics: const NeverScrollableScrollPhysics(),
             children: [
               Container(
-                  color: const Color.fromARGB(255, 177, 13, 13),
+                  color: const Color.fromARGB(255, 177, 11, 19),
                   child: Center(
                       child: Text(
                     " ",
                     style: TextStyle(color: Colors.white),
                   ))),
               Container(
-                  color: const Color.fromARGB(255, 177, 13, 13),
+                  color: const Color.fromARGB(255, 177, 11, 19),
                   child: Center(
                       child: Text(
                     " ",
                     style: TextStyle(color: Colors.white),
                   ))),
               Container(
-                  color: const Color.fromARGB(255, 177, 13, 13),
+                  color: const Color.fromARGB(255, 177, 11, 19),
                   child: Center(
                       child: Text(
                     " ",
                     style: TextStyle(color: Colors.white),
                   ))),
             ],
-          ),
-          SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const SizedBox(height: 40),
-              ],
-            ),
           ),
         ],
       ),
